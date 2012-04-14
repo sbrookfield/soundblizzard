@@ -17,14 +17,14 @@ class config(object):
     from gi.repository import Gio
     self.settings = Gio.Settings.new("apps.soundblizzard")    
   def test(self):
-    dbfile = conf.settings.get_string('dbfile')
-    dbfile = Gio.File.new(path=dbfile)
-    if (dbfile.query_file_type != gio.FILE_TYPE_REGULAR):
-        print('dbfile not normal file')
+    dbfile = self.settings.get_string('dbfile')
+    print(dbfile)
+    dbfile = Gio.file_new_for_uri(dbfile)
+    if (dbfile.query_file_type(Gio.FileQueryInfoFlags.NONE, None) == Gio.FileType.REGULAR):
+        print('dbfile not normal file'+ dbfile)
 if __name__ == "__main__":
     print('Testing...')
-    conf = sb_config_gsettings()
+    conf = config()
     conf.settings.set_boolean('test-setting', True)
     conf.test()
     print('done\n')
-    
