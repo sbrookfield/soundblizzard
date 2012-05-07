@@ -1,7 +1,7 @@
-#import pyGst
-#pyGst.require("0.10")
-#import Gst
-from gi.repository import GObject, Gst
+import pyGst
+pyGst.require("0.10")
+import Gst
+#from gi.repository import GObject, Gst
 import loggy
 #thanks to http://jderose.blogspot.co.uk/2011/09/porting-gstreamer-apps-to-pygi.html
 class player(GObject.GObject):
