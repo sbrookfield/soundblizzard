@@ -12,7 +12,7 @@ class gstr(object):
     '''
     Player - gst player
     '''
-    def __init__(self):  
+    def __init__(self):
         self.player = gst.element_factory_make("playbin", "player")
         #self.vis = gst.element_factory_make("goom", "vis")
         self.bus = self.player.get_bus()
@@ -23,7 +23,7 @@ class gstr(object):
         self.reset
     def load_file(self, filename):
         self.reset()
-        loggy.log( "Player loading " + filename ) 
+        loggy.log( "Player loading " + filename )
         self.player.set_property("uri", "file://" + filename)
         #self.player.set_state(gst.STATE_PLAYING)
         self.player.set_state(gst.STATE_PAUSED)
@@ -44,13 +44,13 @@ class gstr(object):
             err, debug = message.parse_error()
             loggy.log( "Player GST_MESSAGE_ERROR: " + err + debug)
         elif message.type == gst.MESSAGE_STATE_CHANGED:
-            self.update_play_state()        
+            self.update_play_state()
         elif message.type == gst.MESSAGE_STREAM_STATUS:
             self.update_play_state()
 #        elif message.type == gst.MESSAGE_NEW_CLOCK:
 #            None #TODO
 #        elif message.type == gst.MESSAGE_QOS:
-#            None #TODO        
+#            None #TODO
         elif message.type == gst.MESSAGE_ASYNC_DONE:
             None #TODO
         elif message.type == gst.MESSAGE_TAG: # thanks to http://www.jezra.net/blog/use_python_and_gstreamer_to_get_the_tags_of_an_audio_file
@@ -71,7 +71,7 @@ class gstr(object):
             self.duration = datetime.timedelta(seconds=(self.dur / gst.SECOND))
             loggy.log(str(self.duration))
 #        elif message.type == gst.MESSAGE_ELEMENT:
-#            None #TODO    
+#            None #TODO
         else:
             loggy.log( "Player GST message unhandled:" + str(message.type))
         #self.update_play_state()

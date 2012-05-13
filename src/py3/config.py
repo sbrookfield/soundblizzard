@@ -15,7 +15,7 @@ class config(object):
   def __init__(self):
     '''Initialises class'''
     from gi.repository import Gio
-    self.settings = Gio.Settings.new("apps.soundblizzard")    
+    self.settings = Gio.Settings.new("apps.soundblizzard")
   def test(self):
     dbfile = self.settings.get_string('dbfile')
     print(dbfile)

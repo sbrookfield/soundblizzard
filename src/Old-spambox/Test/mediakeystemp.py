@@ -29,16 +29,16 @@ def on_mediakey(comes_from, what):
 # set up the glib main loop.
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 bus = dbus.Bus(dbus.Bus.TYPE_SESSION)
-bus_object = bus.get_object('org.gnome.SettingsDaemon', 
+bus_object = bus.get_object('org.gnome.SettingsDaemon',
                             '/org/gnome/SettingsDaemon/MediaKeys')
 
 # this is what gives us the multi media keys.
 dbus_interface='org.gnome.SettingsDaemon.MediaKeys'
-bus_object.GrabMediaPlayerKeys("MyMultimediaThingy", 0, 
+bus_object.GrabMediaPlayerKeys("MyMultimediaThingy", 0,
                                dbus_interface=dbus_interface)
 
 # connect_to_signal registers our callback function.
-bus_object.connect_to_signal('MediaPlayerKeyPressed', 
+bus_object.connect_to_signal('MediaPlayerKeyPressed',
                              on_mediakey)
 
 # We create a loop.
@@ -47,13 +47,13 @@ loop = gobject.MainLoop()
 # this could be the mainloop, that we run forever.
 #loop.run()
 
-# The threads_init() function initializes the the use of Python 
-#  threading in the gobject module. 
+# The threads_init() function initializes the the use of Python
+#  threading in the gobject module.
 #
 # http://pygstdocs.berlios.de/pygobject-reference/gobject-functions.html
 gobject.threads_init()
 
-# A gobject.MainContext represents a set of event sources that can be 
+# A gobject.MainContext represents a set of event sources that can be
 #  run in a single thread
 context = loop.get_context()
 

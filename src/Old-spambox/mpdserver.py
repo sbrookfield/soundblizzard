@@ -14,9 +14,9 @@ class mpdserver(object):
     Settings - self.port = tcp_port
     self.host = tcp_host
     '''
-    def __init__(self, gst_obj):  
+    def __init__(self, gst_obj):
         '''
-        ''' 
+        '''
         self.queue = ''
         self.queueing = False
         self.ok_queueing = False
@@ -36,7 +36,7 @@ class mpdserver(object):
         loggy.log( "Connected from " + str(conn.getsockname()))
         gobject.io_add_watch(conn, gobject.IO_IN, self.handler)
         conn.send('OK MPD 0.15.0\n')
-        return True   
+        return True
     def handler(self, conn, *args):
         '''Asynchronous connection handler. Processes each line from the socket.'''
         buffer = conn.recv(4096) #TODO handle if more on conn to recieve than 4096
@@ -154,7 +154,7 @@ class mpdserver(object):
                     else:
                         loggy.log('mpdserver - could not understand setvol to ' + args)
                         output = 'ACK could not understand arguments\n'
-                    
+
                 elif command == 'single':
                     output = 'OK\n'
                 elif command == 'replay_gain_mode':
@@ -243,7 +243,7 @@ class mpdserver(object):
                     output = 'OK\n'
                 elif command == '':
                     output = 'OK\n'
-                #Command queueing        
+                #Command queueing
                 elif command == 'command_list_begin':
                     print 'starting queueing commands'
                     loggy.warn('command_list_begin used on mpd client')
@@ -283,7 +283,7 @@ class mpdserver(object):
                     output += 'ACK Unrecognised Command\n'
                     self.queueing = False
                     self.ok_queueing = False
-                #TODO reflection, stickers, client to client            
+                #TODO reflection, stickers, client to client
                 #Respond to client
                 if self.ok_queueing:
                     #if output[-3:-1] == 'OK':
@@ -301,8 +301,8 @@ class mpdserver(object):
     def trackdetails (self, file):
         values = self.player.db.get_row('music', 'filename', file)
         loggy.log(str(values) + str(self.player.db.keys))
-        tags = dict(zip(self.player.db.keys, values))  
-        loggy.log(str(tags))       
+        tags = dict(zip(self.player.db.keys, values))
+        loggy.log(str(tags))
 if __name__ == "__main__":
     player1 = player.player()
     player1.load_file('/data/Music/Girl Talk/All Day/01 - Girl Talk - Oh No.mp3')

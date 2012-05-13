@@ -9,7 +9,7 @@ class player(GObject.GObject):
     '''
     Player - Gst player
     '''
-    __gsignals__ = { 
+    __gsignals__ = {
                     'async-done' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
                                         ()),
                     'state-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
@@ -44,7 +44,7 @@ class player(GObject.GObject):
         self.dur = 1
     def load_uri(self, uri):
         self.reset()
-        loggy.log( "Player loading " + uri ) 
+        loggy.log( "Player loading " + uri )
         self.uri = uri
         self.player.set_property("uri", uri)
         self.player.set_state(Gst.State.PLAYING)
@@ -58,14 +58,14 @@ class player(GObject.GObject):
         print (self.bus.pop())
         return
         if message.type == Gst.MESSAGE_EOS: #TODO reorder for speed , or take signals out individually...
-            self.get_next() 
+            self.get_next()
         elif message.type == Gst.MESSAGE_ERROR:
             self.reset()
             err, debug = message.parse_error()
             loggy.log( "Player GST_MESSAGE_ERROR: " + str(err) + str(debug))
             self.get_next()
         elif message.type == Gst.MESSAGE_STATE_CHANGED:
-            self.emit('state-changed')  
+            self.emit('state-changed')
         elif message.type == Gst.MESSAGE_STREAM_STATUS:
             self.update_position()
         elif message.type == Gst.MESSAGE_NEW_CLOCK:
@@ -147,7 +147,7 @@ class player(GObject.GObject):
         if (vol<0): vol = 0
         return vol
 GObject.type_register(player)
-        
+
 if __name__ == "__main__":
     player1 = player()
     player1.load_uri('file:///data/Music/Benny Benassi/Cinema/01. Cinema (Radio Edit).mp3')

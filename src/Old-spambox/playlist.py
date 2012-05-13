@@ -2,7 +2,7 @@ try:
     import loggy, player, gobject
 except:
     loggy.warn('Could not find required libraries: loggy, player, gobject')
-    
+
 class playlist(object):
     def __init__(self, player):
         self.player = player
@@ -26,12 +26,11 @@ class playlist(object):
                     self.player.load_uri(self.playlist[self.position])
             else:
                 self.player.load_uri(self.playlist[self.position])
-        
+
 if __name__ == "__main__":
     player1 = player.player()
     player1.playlist = playlist(player1)
 
     gobject.MainLoop().run()
     #todo handle address lost
-    
-        
+

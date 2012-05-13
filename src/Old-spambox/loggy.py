@@ -13,7 +13,7 @@ except:
 #Have a null version of loggy for speed
 errors=[]
 debug_setting = False
-def __init__():  
+def __init__():
     ''
 def debug(message):
     if debug_setting : print time.asctime() + ' :: ' + message.replace('\n', '|')

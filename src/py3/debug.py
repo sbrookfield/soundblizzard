@@ -7,7 +7,7 @@ Created on 8 Apr 2012
 import sys
 from gi.repository import GObject
 def oot(fd, condition):
-    
+
     try:
         global SoundBlizzard
         print(eval(fd.readline()))
@@ -19,5 +19,4 @@ if __name__ == '__main__':
 GObject.io_add_watch(sys.stdin, GObject.IO_IN, oot)
 if __name__ == '__main__':
     loop.run()
-        
-        
+

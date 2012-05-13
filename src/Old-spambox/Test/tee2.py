@@ -30,13 +30,13 @@ class myPlayer ():
         #self.bus.enable_sync_message_emission()
         #self.bus.connect("message", self.on_message)
         print self.player
-        
-        
+
+
     def playfile(self,file):
         self.player.set_property('uri', file)
         self.player.set_state(gst.STATE_PLAYING)
         pipelinestate = self.player.get_state()
-        
+
         while pipelinestate[1] == gst.STATE_PLAYING:
             time.sleep(1)
             pipelinestate = self.player.get_state()
@@ -45,4 +45,3 @@ class myPlayer ():
 if __name__ == '__main__':
     player = myPlayer()
     player.playfile('file:///home/sam/Music/POPCORN.MP3')
- 

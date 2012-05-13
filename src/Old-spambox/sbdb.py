@@ -1,12 +1,12 @@
 try:
-    import loggy, os, sqlite3, config, mimetypes, tagger, gobject, config
+    import loggy, os, sqlite3, mimetypes, tagger,
 except:
     loggy.warn('sbdb - Could not find required libraries: loggy, os, sqlite3, mimetypes, tagger, gobject, config')
-    
+
 class sbdb(object):
     keys = ('uri', 'artist', 'title', 'album', 'date', 'genre', 'duration', 'rating') # + mimetype , atime, mtime, ctime, dtime
-    def __init__(self):
-        self.config = config.config()
+    def __init__(self, soundblizzard):
+        self.config = soundblizzard.config
         self.config.load()
         self.dbpath = self.config.get('Main', 'dbfile')
         loggy.log("Database: Loading database from " + self.dbpath)
@@ -52,13 +52,13 @@ class sbdb(object):
         self.tagger.init()
 
         for folder in self.config.get('Main', 'libraryfolders').split(" "):
-            loggy.log('ELE '+folder) 
+            loggy.log('ELE '+folder)
             for path, dirs, files in os.walk(folder):
                 for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files ]:
                     mime = mimetypes.guess_type(filename)[0] #TODO get rid of mimetype
                     if not mime:
                         None
-                    elif mime.startswith("audio"): 
+                    elif mime.startswith("audio"):
                         loggy.log("Database recreate_db Adding Audio :" + filename)
                         self.totag.append(filename)
                     elif mime.startswith("video"):
@@ -78,8 +78,8 @@ class sbdb(object):
             loggy.log('finished getting tags...')
             gobject.MainLoop().quit()
             print self.get_uri_db_info("file:///home/sam/Music/POPCORN.MP3")
-            
-            
+
+
     def settag(self):
 #        if len(self.tagger.tags):
 #           loggy.log( str(self.tagger.tags))
@@ -112,8 +112,8 @@ class sbdb(object):
                 #loggy.log('OOOOOOOOOOOOOOOOOOOOOOOOOOOO')#TODO - deal with errors properly
         self.gettag()
         #TODO convert to gio/uris, see test/gio       stat, etc
-            
-                              
+
+
 
 
 if __name__ == "__main__":
@@ -121,4 +121,4 @@ if __name__ == "__main__":
     db.recreate_db()
     gobject.MainLoop().run()
 
-  
+

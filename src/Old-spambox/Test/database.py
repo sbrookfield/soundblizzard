@@ -23,7 +23,7 @@ class sbdb(object):
         string = "create table if not exists \"{0}\" ( \"{1}\" )".format(name, "\" , \"".join(fields))
         print string
         self.curs.execute(string)
-        self.conn.commit()    
+        self.conn.commit()
     def recreate_table(self, name, fields):
         self.curs.execute("drop table if exists " + name) # remove drop tables
         string = "create table if not exists \"{0}\" ( \"{1}\" )".format(name, "\" , \"".join(fields))
@@ -55,7 +55,7 @@ class sbdb(object):
                     print filename
                     mime = mimetypes.guess_type(filename)[0]
                     print mime
-                    if not mime.find("audio"): 
+                    if not mime.find("audio"):
                         tag = EasyID3(filename)
                         print " Adding Music {0} - {1} ".format(tag['artist'][0], tag['title'][0])
                         self.insert_row("music", [filename, tag['artist'][0], tag['title'][0]])
@@ -66,13 +66,13 @@ class sbdb(object):
                         print " Adding Video " + filename
                         self.insert_row("videos", [filename, "", filename])
                     else:
-                        print " Could not determine mime type, ignoring"                    
+                        print " Could not determine mime type, ignoring"
         self.conn.commit
 if __name__ == "__main__":
     db = sbdb()
     db.recreate_db()
 
-    
+
 #remember to commit!
                     #if mime:
                     #    if mime.split("/")[0] == "audio"

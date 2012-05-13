@@ -23,7 +23,7 @@ class tagger(object):
         self.reset()
         self.callback = callback
         self.filename = "file://" + filename
-        loggy.log( "Player loading " + self.filename ) 
+        loggy.log( "Player loading " + self.filename )
         self.source.set_property("uri", self.filename)
         self.player.set_state(gst.STATE_PAUSED)
 

@@ -14,18 +14,18 @@ class player(gobject.GObject):
                         'Current volume of gstreamer pipeline',
                         0, 100, 50, gobject.PARAM_READWRITE)
                        }
-    __gsignals__ = { 
+    __gsignals__ = {
                     'async-done' : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
                                         ()),
                     'hemisecond' : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
                                         ())
                     }
-#    def do_get_property(self, property): 
+#    def do_get_property(self, property):
 #        if property.name == 'vol':
 #            return self.vol
 #        else:
 #            raise AttributeError, 'unknown property %s' % property.name
-    def do_set_property(self, property, value): 
+    def do_set_property(self, property, value):
         loggy.log('player.do_set_property')
         if property.name == 'vol':
             self.vol = value
@@ -78,7 +78,7 @@ class player(gobject.GObject):
         self.load_uri('file://' + filename) #TODO make all uri
     def load_uri(self, uri):
         self.reset()
-        loggy.log( "Player loading " + uri ) 
+        loggy.log( "Player loading " + uri )
         self.uri = uri
         self.player.set_property("uri", uri)
         self.player.set_state(gst.STATE_PLAYING)
@@ -88,14 +88,14 @@ class player(gobject.GObject):
         self.tags = {}
     def on_message(self, bus, message):
         if message.type == gst.MESSAGE_EOS: #TODO reorder for speed , or take signals out individually...
-            self.get_next() 
+            self.get_next()
         elif message.type == gst.MESSAGE_ERROR:
             self.reset()
             err, debug = message.parse_error()
             loggy.log( "Player GST_MESSAGE_ERROR: " + str(err) + str(debug))
             self.get_next()
         elif message.type == gst.MESSAGE_STATE_CHANGED:
-            self.update_play_state()  
+            self.update_play_state()
         elif message.type == gst.MESSAGE_STREAM_STATUS:
             self.update_position()
         elif message.type == gst.MESSAGE_NEW_CLOCK:
@@ -233,7 +233,7 @@ class player(gobject.GObject):
 #        self.videosink.set_xwindow_id(xid)
 #        self.vidout['xid'] = xid
 gobject.type_register(player)
-        
+
 if __name__ == "__main__":
     player1 = player()
     player1.load_file('/data/Music/Girl Talk/All Day/01 - Girl Talk - Oh No.mp3')

@@ -29,19 +29,19 @@ class myPlayer ():
         self.tee.link(self.queuea)
         gst.element_link_many(self.queuea, self.agoom, self.acolorspace, self.avidsink)
         self.tee.link(self.queueb)
-        gst.element_link_many(self.queueb, self.asink)        
+        gst.element_link_many(self.queueb, self.asink)
         self.tee.link(self.queuev)
         gst.element_link_many(self.queuev, self.goom,self.colorspace, self.vidsink)
 
     def onNewDecodedPad(self,decodebin, pad, islast):
         #link the pad to the converter
         decodebin.link(self.conv)
-        
+
     def playfile(self,file):
         self.src.set_property('location', file)
         self.pipeline.set_state(gst.STATE_PLAYING)
         pipelinestate = self.pipeline.get_state()
-        
+
         while pipelinestate[1] == gst.STATE_PLAYING:
             time.sleep(1)
             pipelinestate = self.pipeline.get_state()
@@ -50,4 +50,3 @@ class myPlayer ():
 if __name__ == '__main__':
     player = myPlayer()
     player.playfile('/home/sam/Music/POPCORN.MP3')
- 

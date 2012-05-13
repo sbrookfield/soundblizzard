@@ -9,7 +9,7 @@ class mediakeys(object):
     '''
     Connects to Gnome Media Keys on dbus for control
     '''
-    def __init__(self, player):  
+    def __init__(self, player):
         self.getkeys()
         self.player = player
 
@@ -19,7 +19,7 @@ class mediakeys(object):
         self.bus_object = self.bus.get_object('org.gnome.SettingsDaemon', '/org/gnome/SettingsDaemon/MediaKeys')
         self.bus_object.GrabMediaPlayerKeys('spambox', 0, dbus_interface='org.gnome.SettingsDaemon.MediaKeys')
         self.bus_object.connect_to_signal('MediaPlayerKeyPressed', self.handle_mediakeys)
-        
+
     def handle_mediakeys(self, caller, command):
         print ''.join(['Media Key Pressed: ', command])
         if command =='Next':

@@ -15,5 +15,5 @@ class library(object):
 if __name__ == "__main__":
     test = library()
     test.load_module("pygtk")
-                
+
 
