@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #try:
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkX11
 import player, loggy, gst, cairo
 #pyGtk.require("2.0")
 #except:
 #	print "gui - Required libraries not found - pyGtk, Gtk, player, loggy, gst, sbdb! Please install\n"
-
+#TODO while gtk.gtk_events_pending(): gtk.gtk_main_iteration() - does this work?
 class GTKGui(object):
 	def __init__(self, soundblizzard):
 		loggy.warn('Gui loading...')
@@ -39,10 +39,12 @@ class GTKGui(object):
 			self.window.show()
 		#self.window.fullscreen() #TODO fullscreen
 
-		self.get_widgets('albumartdrawingarea')
-		for alb in self.widgets['albumartdrawingarea']:
-			self.album_arts.append(alb)
-		#    self.player.videosink.set_xwindow_id(alb.window.xid)
+		#self.get_widgets('albumartdrawingarea')
+		#for alb in self.widgets['albumartdrawingarea']:
+			#self.album_arts.append(alb)
+			#print alb.window
+			#self.player.videosink.set_xwindow_id(alb.window.xid)
+			#print(alb.get_window_xid())
 
 		self.player.on_update_play_state.append(self.on_play_state_change)
 		self.player.on_update_volume.append(self.on_volume_change)
@@ -79,9 +81,9 @@ class GTKGui(object):
 		#print label
 		for position_label in self.widgets['position_labels']:
 			position_label.set_label(label)
-	def on_play_state_change(self,temp):
+	def on_play_state_change(self,temp,state):
 		#TODO - make player only emit one signal for each event
-		state = self.player.getstate()
+		#state = self.player.getstate()
 		loggy.debug('gui.on_play_state_change ' + state)
 		if (state == 'play'):
 			for playbutton in self.widgets['playbuttons']:
@@ -120,6 +122,8 @@ class GTKGui(object):
 		for volume_scale in self.volume_scales:
 			volume_scale.set_value(volume)
 	def on_volume_scale_change(self, widget, value):
+		if (value == self.player.getvol()):
+			return True
 		self.player.setvol(value)
 	def is_info_label(self, widget):
 		self.widgets['info_labels'].append(widget)
@@ -174,8 +178,7 @@ class GTKGui(object):
 #            widget.set_from_pixbuf(pixbuf)
 	def is_video_out(self, widget):
 		loggy.debug('is_video_out')
-
-		self.player.vidout['xid'] = widget.window.xid
+		self.player.vidout['xid'] = widget.get_property('window').get_xid() # don't forget to import GdkX11!
 		#self.player.add_vid(widget.window.xid)
 	def is_master_tree(self, widget):
 		self.main_trees.append(widget)

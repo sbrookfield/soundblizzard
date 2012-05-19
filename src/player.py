@@ -13,34 +13,34 @@ class player(GObject.GObject):
 	'''
 	SECOND = 1000000000
 	__gproperties__ = {
-						'vol' : (GObject.TYPE_INT, 'volume',
-						'Current volume of gstreamer pipeline',
-						0, 100, 50, GObject.PARAM_READWRITE)
+						#'vol' : (GObject.TYPE_INT, 'volume','Current volume of gstreamer pipeline',	0, 100, 50, GObject.PARAM_READWRITE)
 					}
 	__gsignals__ = {
 					'async-done' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
 										()),
 					'hemisecond' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
-					'play-state-change' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,())
+					'play-state-change' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(GObject.TYPE_STRING,)),
+					'volume-change' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(GObject.TYPE_INT,))
 
 
 					}
-#    def do_get_property(self, property):
-#        if property.name == 'vol':
-#            return self.vol
-#        else:
-#            raise AttributeError, 'unknown property %s' % property.name
-	def do_set_property(self, property, value):
-		loggy.log('player.do_set_property')
-		if property.name == 'vol':
-			self.vol = value
-			self.player.set_property('volume', float(value)/100)
-		else:
-			raise AttributeError( 'unknown property %s' % property.name)
+#	def do_get_property(self, property):
+#		if property.name == 'vol':
+#			return self.vol
+#		else:
+#			raise AttributeError, 'unknown property %s' % property.name
+#	def do_set_property(self, property, value):
+#		loggy.log('player.do_set_property')
+#		if property.name == 'vol':
+#			self.vol = value
+#			self.playbin.set_property('volume', float(value)/100)
+#		else:
+#			raise AttributeError( 'unknown property %s' % property.name)
 	def debug(self, widget, param):
 		print ('temp' + str(widget) + str(param))
 	def __init__(self, soundblizzard):  #Thanks to http://pygstdocs.berlios.de/pygst-tutorial/playbin.html
 		GObject.GObject.__init__(self)
+		self.state = 'stop'
 		self.soundblizzard = soundblizzard
 		#GObject.signal_new("async-done", GObject.GObject, (GObject.SIGNAL_RUN_LAST | GObject.SIGNAL_ACTION | GObject.SIGNAL_DETAILED), GObject.TYPE_BOOLEAN, GObject.TYPE_NONE)
 		self.connect('notify::vol', self.debug)
@@ -51,17 +51,18 @@ class player(GObject.GObject):
 		self.on_update_tags = []
 		self.vidout = {}
 		self.position = 0
-		#self.pipeline = gst.Pipeline('pipeline')
-		self.player = gst.element_factory_make("playbin", "player")
+		self.player = gst.Pipeline('pipeline')
+		self.playbin = gst.element_factory_make("playbin", "player")
 		self.vis = gst.element_factory_make("goom", "vis")
 		self.videosink = gst.element_factory_make("xvimagesink", 'videosink')
 		#self.videosink = gst.element_factory_make('fakesink', 'videosink')
 		#self.videosink.set_property('async', False) # required for fakesink otherwise pipeline stops
 		self.audiosink = gst.element_factory_make("autoaudiosink", 'audiosink')
-		#self.pipeline.add(self.player, self.vis, self.videosink, self.audiosink)
-		self.player.set_property("vis-plugin", self.vis)
-		self.player.set_property("video-sink", self.videosink)
-		self.player.set_property("audio-sink", self.audiosink)
+		
+		self.playbin.set_property("vis-plugin", self.vis)
+		self.playbin.set_property("video-sink", self.videosink)
+		self.playbin.set_property("audio-sink", self.audiosink)
+		self.player.add(self.playbin)
 		self.bus = self.player.get_bus()
 		self.bus.add_signal_watch()
 		self.bus.enable_sync_message_emission()
@@ -86,7 +87,7 @@ class player(GObject.GObject):
 		self.reset()
 		loggy.log( "Player loading " + uri )
 		self.uri = uri
-		self.player.set_property("uri", uri)
+		self.playbin.set_property("uri", uri)
 		self.player.set_state(gst.STATE_PLAYING)
 	def reset(self):
 		self.player.set_state(gst.STATE_NULL)
@@ -98,11 +99,15 @@ class player(GObject.GObject):
 		elif message.type == gst.MESSAGE_ERROR:
 			self.reset()
 			err, debug = message.parse_error()
-			loggy.log( "Player GST_MESSAGE_ERROR: " + str(err) + str(debug))
+			loggy.warn( "Player GST_MESSAGE_ERROR: " + str(err) + str(debug))
 			self.get_next()
 		elif message.type == gst.MESSAGE_STATE_CHANGED:
 			#self.update_play_state()
-			self.emit('play-state-change')
+			if message.src == self.player:
+				if (self.getstate() != self.state):
+					self.state = self.getstate()
+					self.emit('play-state-change', self.state)
+					print 'state change'
 		elif message.type == gst.MESSAGE_STREAM_STATUS:
 			self.update_position()
 		elif message.type == gst.MESSAGE_NEW_CLOCK:
@@ -175,20 +180,28 @@ class player(GObject.GObject):
 			return False
 	def getpos(self):
 		'''Returns current position of track in nanoseconds'''
-		pos = int(self.player.query_position(gst.FORMAT_TIME, None)[0])
-		return pos
+		if self.state == 'stop': 
+			return 0
+		else:
+			return int(self.player.query_position(gst.FORMAT_TIME, None)[0])
 	def getdur(self):
 		'''Returns duration of current track in nanoseconds'''
-		return int(self.player.query_duration(gst.FORMAT_TIME)[0])
+		if self.state == 'stop':
+			return 0
+		else:
+			return int(self.player.query_duration(gst.FORMAT_TIME)[0])
 	def setvol(self, vol):
-		loggy.debug('player.setvol')
-		self.vol = vol
+		loggy.debug('player.setvol: ' + str(vol))
+		if (vol != self.vol):
+			self.vol = vol
+			self.playbin.set_property('volume', float(vol)/100)
 		#self.set_property('vol', vol)
 		#vol = float(vol)/100
 		#self.player.set_property('volume', vol)
 		return True
 	def getvol(self):
-		vol = round(self.player.get_property('volume')*100)
+		vol = round(self.playbin.get_property('volume')*100)
+		loggy.debug('player.getvol: ' + str(vol))
 		if (vol>100): vol = 100
 		if (vol<0): vol = 0
 		return vol
