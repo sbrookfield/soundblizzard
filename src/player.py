@@ -21,8 +21,6 @@ class player(GObject.GObject):
 					'hemisecond' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
 					'play-state-change' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(GObject.TYPE_STRING,)),
 					'volume-change' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(GObject.TYPE_INT,))
-
-
 					}
 #	def do_get_property(self, property):
 #		if property.name == 'vol':
@@ -72,6 +70,7 @@ class player(GObject.GObject):
 		#self.bus.connect("sync-message::element", self.on_sync_message)
 		#self.conf = config.config()
 		#self.conf.load()
+		self.vol = 100
 		self.playlist = []
 		self.random = False
 		self.repeat = False
@@ -192,19 +191,21 @@ class player(GObject.GObject):
 			return int(self.player.query_duration(gst.FORMAT_TIME)[0])
 	def setvol(self, vol):
 		loggy.debug('player.setvol: ' + str(vol))
+		if (vol>100): vol = 100
+		if (vol<0): vol = 0
+		vol = int(vol)
 		if (vol != self.vol):
 			self.vol = vol
-			self.playbin.set_property('volume', float(vol)/100)
+			self.playbin.set_property('volume', float(self.vol)/100)
+			self.emit('volume-change', self.vol)
 		#self.set_property('vol', vol)
 		#vol = float(vol)/100
 		#self.player.set_property('volume', vol)
 		return True
 	def getvol(self):
-		vol = round(self.playbin.get_property('volume')*100)
-		loggy.debug('player.getvol: ' + str(vol))
-		if (vol>100): vol = 100
-		if (vol<0): vol = 0
-		return vol
+		#vol = round(self.playbin.get_property('volume')*100)
+		loggy.debug('player.getvol: ' + str(self.vol))
+		return self.vol
 	def getstate(self):
 		if self.player.get_state()[1] == gst.STATE_PLAYING:
 			return 'play'

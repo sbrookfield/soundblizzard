@@ -115,8 +115,8 @@ class GTKGui(object):
 			return "%i:%02i:%02i" %(h,m,s)
 	def is_volume_scale(self, widget):
 		self.volume_scales.append(widget)
-		widget.get_adjustment().set_upper(100)
-		widget.set_value(self.player.getvol())
+		widget.set_adjustment(Gtk.Adjustment(value=self.player.getvol(), lower=0, upper=100, step_incr=5, page_incr=10, page_size=0))
+		#widget.set_value(self.player.getvol())
 		#widget.set_from_icon_name(Gtk.STOCK_OPEN, 36)
 	def on_volume_change(self, volume):
 		for volume_scale in self.volume_scales:

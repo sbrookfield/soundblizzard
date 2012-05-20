@@ -151,14 +151,16 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-                <property name="relief">none</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="orientation">vertical</property>
+                <property name="value">100</property>
+                <property name="size">large-toolbar</property>
                 <property name="icons">audio-volume-muted
 audio-volume-high
 audio-volume-low
 audio-volume-medium</property>
+                <property name="use_symbolic">True</property>
                 <signal name="value-changed" handler="on_volume_scale_change" swapped="no"/>
                 <signal name="map" handler="is_volume_scale" swapped="no"/>
               </object>
