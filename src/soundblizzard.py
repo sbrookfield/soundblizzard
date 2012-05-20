@@ -2,7 +2,7 @@
 
 ''' Main soundblizzard program'''
 from gi.repository import GObject
-
+mainloop = GObject.MainLoop()
 class soundblizzard():
 
 	def __init__(self):
@@ -23,7 +23,7 @@ class soundblizzard():
 		import loggy
 		loggy.debug_setting = True
 		import dbus_mpris
-		self.dbus = dbus.dbus(self)
+		self.dbus_mpris = dbus_mpris.dbus_mpris(self)
 		#import gui
 		#self.gtkgui = gui.GTKGui(self)
 		None

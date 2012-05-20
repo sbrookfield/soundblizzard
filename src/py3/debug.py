@@ -8,15 +8,15 @@ import sys
 from gi.repository import GObject
 def oot(fd, condition):
 
-    try:
-        global SoundBlizzard
-        print(eval(fd.readline()))
-    except :
-        pass
-    return True
+	try:
+		global SoundBlizzard
+		print(eval(fd.readline()))
+	except :
+		pass
+	return True
 if __name__ == '__main__':
-    loop = GObject.MainLoop()
+	loop = GObject.MainLoop()
 GObject.io_add_watch(sys.stdin, GObject.IO_IN, oot)
 if __name__ == '__main__':
-    loop.run()
+	loop.run()
 

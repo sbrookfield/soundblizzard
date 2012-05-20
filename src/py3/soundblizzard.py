@@ -10,7 +10,7 @@ SoundBlizzard = GObject.GObject()
 SoundBlizzard.loop = GObject.MainLoop()
 print (SoundBlizzard.loop)
 if __name__ != '__main__':
-    raise Exception('Leaving as not main')
+	raise Exception('Leaving as not main')
 import config, player, config#, mediakeys
 #debug initialises automatically
 SoundBlizzard.player = player.player()

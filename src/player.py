@@ -56,7 +56,7 @@ class player(GObject.GObject):
 		#self.videosink = gst.element_factory_make('fakesink', 'videosink')
 		#self.videosink.set_property('async', False) # required for fakesink otherwise pipeline stops
 		self.audiosink = gst.element_factory_make("autoaudiosink", 'audiosink')
-		
+
 		self.playbin.set_property("vis-plugin", self.vis)
 		self.playbin.set_property("video-sink", self.videosink)
 		self.playbin.set_property("audio-sink", self.audiosink)
@@ -179,7 +179,7 @@ class player(GObject.GObject):
 			return False
 	def getpos(self):
 		'''Returns current position of track in nanoseconds'''
-		if self.state == 'stop': 
+		if self.state == 'stop':
 			return 0
 		else:
 			return int(self.player.query_position(gst.FORMAT_TIME, None)[0])

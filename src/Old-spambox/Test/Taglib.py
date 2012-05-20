@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 try:
-  import Mutagen
+import Mutagen
 except:
-  print "Required libraries not found! Please install\n"
+print "Required libraries not found! Please install\n"
 from mutagen.easyid3 import EasyID3
 print EasyID3.valid_keys.keys()
 

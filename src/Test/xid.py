@@ -9,7 +9,7 @@ class GTKGui(object):
 		self.window.show()
 		self.ben = self.builder.get_object("albumartdrawingarea1")
 		print(self.ben.get_property('window').get_xid())
-		
+
 if __name__ == "__main__":
 	app = GTKGui()
 	Gtk.main()
