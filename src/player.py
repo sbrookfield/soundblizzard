@@ -34,15 +34,15 @@ class player(GObject.GObject):
 #			self.playbin.set_property('volume', float(value)/100)
 #		else:
 #			raise AttributeError( 'unknown property %s' % property.name)
-	def debug(self, widget, param):
-		print ('temp' + str(widget) + str(param))
+#	def debug(self, widget, param):
+#		print ('temp' + str(widget) + str(param))
 	def __init__(self, soundblizzard):  #Thanks to http://pygstdocs.berlios.de/pygst-tutorial/playbin.html
 		GObject.GObject.__init__(self)
 		self.state = 'stop'
 		self.soundblizzard = soundblizzard
 		#GObject.signal_new("async-done", GObject.GObject, (GObject.SIGNAL_RUN_LAST | GObject.SIGNAL_ACTION | GObject.SIGNAL_DETAILED), GObject.TYPE_BOOLEAN, GObject.TYPE_NONE)
-		self.connect('notify::vol', self.debug)
-		self.debug = False
+		#self.connect('notify::vol', self.debug)
+		#self.debug = False
 		self.on_update_play_state = []
 		self.on_update_position = []
 		self.on_update_volume = []
