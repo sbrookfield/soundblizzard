@@ -2,6 +2,7 @@
 
 ''' Main soundblizzard program'''
 from gi.repository import GObject
+
 class soundblizzard():
 
 	def __init__(self):
@@ -21,13 +22,15 @@ class soundblizzard():
 		self.sbdb = sbdb.sbdb(self)
 		import loggy
 		loggy.debug_setting = True
-		import gui
-		self.gtkgui = gui.GTKGui(self)
+		import dbus_mpris
+		self.dbus = dbus.dbus(self)
+		#import gui
+		#self.gtkgui = gui.GTKGui(self)
 		None
 
 if __name__ == "__main__":
 	soundblizzard = soundblizzard()
 	soundblizzard.player.load_uri('file:///home/sam/Music/Popcorn.mp3')
 
-	GObject.MainLoop().run()
+	mainloop.run()
 
