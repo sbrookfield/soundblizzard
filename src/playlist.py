@@ -4,8 +4,8 @@ except:
 	loggy.warn('Could not find required libraries: loggy, player, gobject')
 
 class playlist(object):
-	def __init__(self, player):
-		self.player = player
+	def __init__(self, soundblizzard):
+		self.player = soundblizzard.player
 		self.playlist = []
 		self.random = False
 		self.repeat = True

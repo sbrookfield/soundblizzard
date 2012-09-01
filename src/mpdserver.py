@@ -22,6 +22,7 @@ class mpdserver(object):
 		self.queueing = False
 		self.ok_queueing = False
 		self.player = soundblizzard.player
+		self.playlist = soundblizzard.playlist
 	def startserver(self, host, port):
 		self.host = host
 		self.port = port
@@ -92,33 +93,35 @@ class mpdserver(object):
 					print 'Recognised command clearerror'
 					output = 'OK'
 				elif command == 'currentsong':
-					output += 'file: %s\n' % (self.player.filename)
+					output += 'file: %s\n' % (self.player.uri)#TODO convert from uri
+					output += 'Last-Modified: 2012-08-21T21:18:58Z\n'
 					output += 'Time: %i\n' % (self.player.dursec)
-					output += 'Artist: %s\n' % (self.player.tags['artist'])
-					output += 'AlbumArtist: %s\n' % (self.player.tags['album-artist'])
-					output += 'Title: %s\n' % (self.player.tags['title'])
-					output += 'Album: %s\n' % (self.player.tags['artist'])
-					output += 'Track: %s\n' % ((str(self.player.tags['track-number'])+'/'+str(self.player.tags['track-count'])))
-					output += 'Date: %s\n' % (str(self.player.tags['date'].year))
-					output += 'Genre: %s\n' % (self.player.tags['genre'])
+					output += 'Artist: %s\n' % str(self.player.tags.get('artist'))
+					output += 'AlbumArtist: %s\n' % str(self.player.tags.get('album-artist'))
+					output += 'Title: %s\n' % str(self.player.tags.get('title'))
+					output += 'Album: %s\n' % str(self.player.tags.get('artist'))
+					output += 'Track: %s\n' % (str(self.player.tags.get('track-number'))+'/'+str(self.player.tags.get('track-count')))
+					output += 'Date: %s\n' % str(self.player.tags.get('date').year)
+					output += 'Genre: %s\n' % str(self.player.tags.get('genre'))
 					output += 'Pos: %i\n' % (1)
 					output += 'Id: %i\n' % (1)
 					output += 'OK\n'
 				elif command == 'idle':
 					output = 'changed: database update stored_playlist playlist player mixer output options sticker subscription message\nOK\n'#TODO handle properly
 				elif command == 'status':
-					output += 'volume: %i\n' % (self.player.getvol())
-					output += 'repeat: %i\n' % (0)
-					output += 'random: %i\n' % (0)
+					output += 'volume: %i\n' % (self.player.vol)
+					output += 'repeat: %i\n' % (self.playlist.repeat)
+					output += 'random: %i\n' % (self.playlist.random)
 					output += 'single: %i\n' % (0)
 					output += 'consume: %i\n' % (0)
 					output += 'playlist: %i\n' % (1)
-					output += 'playlistlength: %i\n' % (1)
+					output += 'playlistlength: %i\n' % (2)
 					output += 'xfade: %i\n' % (0)
-					output += 'state: %s\n' % (self.player.getstate())
+					output += 'state: %s\n' % (self.player.state)
 					output += 'song: %i\n' % (1)
 					output += 'songid: %i\n' % (1)
-					output += 'Time: %s\n' % (self.player.getpos())
+					output += 'time: %s.000\n' % (self.player.possec)
+					output += 'elapsed: %s.000\n' % (self.player.possec)
 					output += 'bitrate: %i\n' % (1)
 					output += 'audio: %s\n' % ('x')
 					output += 'nextsong: %i\n' % (1)
@@ -249,16 +252,16 @@ class mpdserver(object):
 					print 'starting queueing commands'
 					loggy.warn('command_list_begin used on mpd client')
 					self.queueing = True
+				elif command == 'command_list_ok_begin':
+					print 'starting queueing commands'
+					self.ok_queueing = True
+					loggy.warn('command_list_ok_begin used on mpd client')
 				elif command == 'command_list_end':
 					print 'ended queueing commands'
 					self.queueing = False
 					self.ok_queueing = False
 					output = self.queue + 'OK\n'
 					self.queue = ''
-				elif command == 'command_list_ok_begin':
-					print 'starting queueing commands'
-					self.ok_queueing = True
-					loggy.warn('command_list_ok_begin used on mpd client')
 				#Connection
 				elif command == 'close':
 					conn.send('OK\n')
@@ -289,7 +292,7 @@ class mpdserver(object):
 				if self.ok_queueing:
 					#if output[-3:-1] == 'OK':
 						#output = output[:-3] + 'list_OK\n'
-					output.replace("OK", "list_OK")
+					output = output.replace("OK", "list_OK")
 					self.queue += output
 					output = ''
 				elif self.queueing:
