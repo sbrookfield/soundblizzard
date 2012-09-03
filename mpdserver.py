@@ -39,6 +39,7 @@ class mpdserver(object):
 		except:
 			loggy.warn('mpdserver failed to start on host %s port %s' % (self.host, self.port))
 			return False
+#TODO: this is a todo
 		self.sock.listen(1)
 		loggy.log('MPD Server Interface Running on ' + host + ':' + str(port) )
 		GObject.io_add_watch(self.sock, GObject.IO_IN, self.listener)
