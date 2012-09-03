@@ -15,6 +15,7 @@ class playlist(object):
 	def load_playlist(self, filename):
 		self.playlist = ['file:///data/Music/Alien Ant Farm/ANThology/01 Courage.mp3', 'file:///data/Music/Armand Van Helden/NYC Beat/02 - NYC Beat (Original).mp3', 'file:///data/Music/Various Artists/Reloaded 4/13. Flavor Of The Weak.mp3']
 		self.position = -1
+		self.get_next()
 	def get_next(self):
 		if self.random:
 			True

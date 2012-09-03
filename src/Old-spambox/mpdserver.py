@@ -35,7 +35,7 @@ class mpdserver(object):
 		conn, addr = sock.accept()
 		loggy.log( "Connected from " + str(conn.getsockname()))
 		gobject.io_add_watch(conn, gobject.IO_IN, self.handler)
-		conn.send('OK MPD 0.15.0\n')
+		conn.send('OK MPD 0.16.0\n')
 		return True
 	def handler(self, conn, *args):
 		'''Asynchronous connection handler. Processes each line from the socket.'''

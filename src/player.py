@@ -15,8 +15,6 @@ class player(GObject.GObject):
 	__gsignals__ = {
 					'async-done' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
 					#'''emitted when gstreamer emits async-done, after file and tags loaded'''
-					'position-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
-					#'''emitted when position of play changes (every second currently)'''
 					'play-state-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
 					#'''emitted when play/pause/stop state changes'''
 					'volume-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
@@ -77,7 +75,7 @@ class player(GObject.GObject):
 	def reset(self):
 		self.player.set_state(gst.STATE_NULL)
 		#for tag in self.
-		self.tags = {}
+		self.tags = self.soundblizzard.sbdb.blanktags
 	def on_message(self, bus, message):
 		if message.type == gst.MESSAGE_EOS: #TODO reorder for speed , or take signals out individually...
 			self.emit('eos')#called when end of stream reached
@@ -174,7 +172,7 @@ class player(GObject.GObject):
 		loggy.debug('player.setvol: ' + str(vol))
 		if (vol>100): vol = 100
 		if (vol<0): vol = 0
-		vol = int(vol)
+		vol = int(round(vol))
 		if (vol != self.vol):
 			self.vol = vol
 			self.playbin.set_property('volume', float(self.vol)/100)

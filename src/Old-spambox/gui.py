@@ -32,13 +32,13 @@ def __init__(self, player, sbdb):
 	self.window = self.builder.get_object("window1")
 	self.get_widgets('window')
 	for window in self.widgets['window']:
-	  window.show()
+	window.show()
 	self.window.show()
 	#self.window.fullscreen() #TODO fullscreen
 
 	self.get_widgets('albumartdrawingarea')
 	for alb in self.widgets['albumartdrawingarea']:
-	  self.player.videosink.set_xwindow_id(alb.window.xid)
+	self.player.videosink.set_xwindow_id(alb.window.xid)
 
 	self.player.on_update_play_state.append(self.on_play_state_change)
 	self.player.on_update_position.append(self.on_position_change)
@@ -53,7 +53,7 @@ def get_widgets(self, name):
 	'''Searches gtkbuilder for widgets with name1, name2, name3 etc and adds them to self.widgets[name]'''
 	self.widgets[name]=[]
 	for x in range(10):
-	  if self.builder.get_object(name + str(x)):
+	if self.builder.get_object(name + str(x)):
 		self.widgets[name].append(self.builder.get_object(name + str(x)))
 def get_next(self, widget):
 	self.player.get_next()
@@ -69,22 +69,22 @@ def on_position_change(self, pos, dur):
 	#loggy.debug('gui.on_position_change')
 	#print "on pos change" + str(pos) + str(dur)
 	for progress_bar in self.progress_bars:
-	  progress_bar.set_range(0, dur)
-	  progress_bar.set_value(pos)
+	progress_bar.set_range(0, dur)
+	progress_bar.set_value(pos)
 	label = self.gst_time_string(pos) + ' / ' + self.gst_time_string(dur)
 	#print label
 	for position_label in self.position_labels:
-	  position_label.set_label(label)
+	position_label.set_label(label)
 def on_play_state_change(self, state):
 	#loggy.debug('gui.on_play_state_change')
 	if (state == 'play'):
-	  for playbutton in self.playbuttons:
+	for playbutton in self.playbuttons:
 		playbutton.set_label(gtk.STOCK_MEDIA_PAUSE)
 	elif (state == 'pause'):
-	  for playbutton in self.playbuttons:
+	for playbutton in self.playbuttons:
 		playbutton.set_label(gtk.STOCK_MEDIA_PLAY)
 	else:
-	  loggy.warn('gui.on_play_state_change got unknown state: ' + state)
+	loggy.warn('gui.on_play_state_change got unknown state: ' + state)
 def is_play_button(self, widget):
 	#print 'playbutton found'
 	self.playbuttons.append(widget)#TODO check for duplicates
@@ -101,10 +101,10 @@ def gst_time_string(self, nanosecs):
 	s,ns = divmod(nanosecs, gst.SECOND)
 	m,s = divmod(s, 60)
 	if m < 60:
-	  return "%02i:%02i" %(m,s)
+	return "%02i:%02i" %(m,s)
 	else:
-	  h,m = divmod(m, 60)
-	  return "%i:%02i:%02i" %(h,m,s)
+	h,m = divmod(m, 60)
+	return "%i:%02i:%02i" %(h,m,s)
 def is_volume_scale(self, widget):
 	self.volume_scales.append(widget)
 	widget.get_adjustment().set_upper(100)
@@ -112,7 +112,7 @@ def is_volume_scale(self, widget):
 	#widget.set_from_icon_name(gtk.STOCK_OPEN, 36)
 def on_volume_change(self, volume):
 	for volume_scale in self.volume_scales:
-	  volume_scale.set_value(volume)
+	volume_scale.set_value(volume)
 def on_volume_scale_change(self, widget, value):
 	self.player.setvol(value)
 def is_info_label(self, widget):
@@ -123,21 +123,21 @@ def on_async_done(self, player):
 def on_update_tags(self):
 	text = ''
 	if 'title' in self.player.tags: #TODO do this after async done, not every time
-	  text += self.player.tags['title']
+	text += self.player.tags['title']
 	if 'artist' in self.player.tags:
-	  text += '\n by ' + self.player.tags['artist']
+	text += '\n by ' + self.player.tags['artist']
 	if 'album' in self.player.tags:
-	  text += ' from ' + self.player.tags['album'] #TODO make font italic
+	text += ' from ' + self.player.tags['album'] #TODO make font italic
 	print text
 	for label in self.info_labels:
-	  label.set_label(text)
+	label.set_label(text)
 	#TODO - get this on timer not on async
 	if 'image' in self.player.tags:
-	  file = self.sbdb.config.get('Main', 'imagefile')
-	  img = open(file, 'w')
-	  img.write(self.player.tags['image'])
-	  img.close()
-	  for album_art in self.album_arts:
+	file = self.sbdb.config.get('Main', 'imagefile')
+	img = open(file, 'w')
+	img.write(self.player.tags['image'])
+	img.close()
+	for album_art in self.album_arts:
 		#album_art.set_from_file(file)
 		self.on_image_resize(album_art, None)
 def is_album_art(self, widget):
@@ -156,10 +156,10 @@ def on_image_resize(self, widgetty, event): #TODO on_image_resize
 	#allocation = widget.get_allocation()# thanks to http://stackoverflow.com/questions/4939734/automatic-image-scaling-on-resize-with-pygtk
 	#ben = widget.get_pixbuf()
 	for widget in self.album_arts:
-	  file = self.sbdb.config.get('Main', 'imagefile') #TODO - does this result in file read?
-	  pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(file,widget.allocation.height , widget.allocation.width)
-	  #pixbuf = widget.get_pixbuf().scale_simple(widget.allocation.width, widget.allocation.height, gtk.gdk.INTERP_BILINEAR)
-	  widget.set_from_pixbuf(pixbuf)
+	file = self.sbdb.config.get('Main', 'imagefile') #TODO - does this result in file read?
+	pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(file,widget.allocation.height , widget.allocation.width)
+	#pixbuf = widget.get_pixbuf().scale_simple(widget.allocation.width, widget.allocation.height, gtk.gdk.INTERP_BILINEAR)
+	widget.set_from_pixbuf(pixbuf)
 def is_video_out(self, widget):
 	loggy.debug('is_video_out')
 
@@ -182,12 +182,12 @@ def master_tree_cursor_changed(self, widget):
 	(model, iter) = widget.get_selection().get_selected()
 	#print self.slave_windows[0].get_children()
 	try:
-	  self.slave_view.destroy()
+	self.slave_view.destroy()
 	except:
-	  None
+	None
 
 	if iter:
-	  self.main_tree_modes[model.get_value(iter,0)]['open_func']()
+	self.main_tree_modes[model.get_value(iter,0)]['open_func']()
 def master_tree_add(self, name, open_func):
 	self.main_tree_store.append(None, [name])
 	self.main_tree_modes[name] = {'open_func' : open_func}
@@ -231,7 +231,7 @@ def __init__(self, gui):
 	self.keystoshow = ('artist', 'title', 'album', 'date', 'genre', 'duration', 'rating','mimetype', 'atime', 'mtime', 'ctime', 'dtime', 'size')
 	self.keystoshowdict = {} # dic of name, col position
 	for i, a in enumerate(self.keystoshow):
-	  self.keystoshowdict[a] = i
+	self.keystoshowdict[a] = i
 	#print self.keystoshowdict
 	#print 'GOOB' + str( player.sbdb.keytypelist )
 	self.list_store = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, str, str, )
@@ -246,7 +246,7 @@ def is_listview(self, widget):
 
 	widget.tv_columns = {}
 	for i, name in enumerate(self.gui.sbdb.totkeys): # go through all keys
-	  if name in self.keystoshowdict: #check if column is to display
+	if name in self.keystoshowdict: #check if column is to display
 		widget.tv_columns[name] = gtk.TreeViewColumn(name)
 		widget.insert_column(widget.tv_columns[name], self.keystoshowdict[name]) # inserts column in order from keystoshow
 		widget.tv_columns[name].cell = gtk.CellRendererText()
@@ -268,7 +268,8 @@ def treeview_activated(self, treeview, path, view_column):
 	loggy.debug('gui.GTK_media_view.treeview_activated')
 	(model, iter) = treeview.get_selection().get_selected()
 	if iter:
-	  self.gui.player.load_uri(self.list_store.get_value(iter,0))
+	self.gui.player.load_uri(self.list_store.get_value(iter,0))
+	self.playlist.playlist = [self.list_store.get_value(iter,0)]
 def tv_clicked(self, widget, i):
 	loggy.debug('gui.GTK_media_view.tv_clicked')
 	widget.set_sort_column_id(i)

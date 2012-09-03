@@ -6,10 +6,10 @@ Created on 8 Apr 2012
 import sys, json, os, loggy
 class config(object):
 	#TODO add support for command line args
-	def __init__(self):
+	def __init__(self, soundblizzard):
 		#load defaults first then config file then command line args
 		self.config = { 'configfile' : os.path.expanduser('~/.config/soundblizzard/soundblizzard.conf'),
-									'libraryfolder' : '/music',
+									'libraryfolders' : ['/music'], #TODO support multiple folders
 									'playlistfolder' : '/music/playlists',
 									'databasefile' : os.path.expanduser('~/.config/sounblizzard/soundblizzard.db')
 								}
@@ -25,12 +25,12 @@ class config(object):
 		#Handle command line arguments	
 		#Splits command line args into dict, if key starts with -- then takes this as an argument and prints these
 		# if key is help prints defaults
+		#TODO improve command line argument recognition
 		a = sys.argv[1:]
 		if len(a) % 2:
 			a.append('')
 		b = {a[i]: a[i+1] for i in range(0, len(a), 2)}
 		c ={}
-		print b
 		for key in b:
 			if key.startswith('--help'):
 				loggy.warn ('Soundblizzard media player\nTo amend config settings please use --key \'value\' on the command line. \n Current values:')
@@ -38,8 +38,9 @@ class config(object):
 				loggy.die('help delivered')
 			elif key.startswith('--'):
 				c[key[2:]] = b[key]
-		loggy.log('Recieved command line arguments: ' +str(c))
+
 		self.config.update(c)
+		loggy.log('Configuration:' +str(self.config))		
 	def save_config(self):
 		try:
 			self.configfd = open(self.config['configfile'], 'w')

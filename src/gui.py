@@ -24,6 +24,7 @@ class GTKGui(object):
 		self.widgets={'playbuttons':[], 'progress_bars':[], 'position_labels':[], 'info_labels':[]}
 		self.soundblizzard = soundblizzard
 		self.player = soundblizzard.player
+		self.playlist = soundblizzard.playlist
 		self.sbdb = soundblizzard.sbdb
 		self.player.connect('async-done', self.on_async_done)
 		self.master_tree_load()
@@ -46,11 +47,13 @@ class GTKGui(object):
 			#self.player.videosink.set_xwindow_id(alb.window.xid)
 			#print(alb.get_window_xid())
 
-		self.player.on_update_play_state.append(self.on_play_state_change)
-		self.player.on_update_volume.append(self.on_volume_change)
-		self.player.on_update_tags.append(self.on_update_tags)
-		self.player.connect('hemisecond', self.on_position_change)
-		self.player.connect('play-state-change', self.on_play_state_change)
+		#self.player.on_update_play_state.append(self.on_play_state_change)
+		#self.player.on_update_volume.append(self.on_volume_change)
+		#self.player.on_update_tags.append(self.on_update_tags)
+		self.player.connect('async-done', self.on_update_tags)
+		self.player.connect('volume-changed', self.on_volume_change)
+		self.player.connect('position-changed', self.on_position_change)
+		self.player.connect('play-state-changed', self.on_play_state_change)
 	def debug(self, data=None):
 		print 'debug got'
 		print data
@@ -62,37 +65,33 @@ class GTKGui(object):
 			if self.builder.get_object(name + str(x)):
 				self.widgets[name].append(self.builder.get_object(name + str(x)))
 	def get_next(self, widget):
-		self.player.get_next()
+		self.playlist.get_next()
 	def get_prev(self, widget):
-		self.player.get_prev()
+		self.playlist.get_prev()
 	def on_playbutton_click(self, widget):
 		loggy.debug('gui.on_playbutton_click')
 		self.player.playpause()
 	def on_position_change(self, player):
 		'''What to do when position change signal recieved'''
 		#loggy.debug('gui.on_position_change')
-		#print "on pos change" + str(pos) + str(dur)
-		pos = self.player.getpos()
-		dur = self.player.getdur()
 		for progress_bar in self.widgets['progress_bars']:
-			progress_bar.set_range(0, dur)
-			progress_bar.set_value(pos)
-		label = self.gst_time_string(pos) + ' / ' + self.gst_time_string(dur)
-		#print label
+			progress_bar.set_range(0, self.player.durns)
+			progress_bar.set_value(self.player.posns)
+		label = self.player.posstr + ' / ' + self.player.durstr
 		for position_label in self.widgets['position_labels']:
 			position_label.set_label(label)
-	def on_play_state_change(self,temp,state):
+	def on_play_state_change(self, player):
 		#TODO - make player only emit one signal for each event
 		#state = self.player.getstate()
-		loggy.debug('gui.on_play_state_change ' + state)
-		if (state == 'play'):
+		loggy.debug('gui.on_play_state_change ' + self.player.state)
+		if (self.player.state == 'play'):
 			for playbutton in self.widgets['playbuttons']:
 				playbutton.set_label(Gtk.STOCK_MEDIA_PAUSE)
-		elif (state == 'pause'):
+		elif (self.player.state == 'pause' or self.player.state == 'stop'):
 			for playbutton in self.widgets['playbuttons']:
 				playbutton.set_label(Gtk.STOCK_MEDIA_PLAY)
 		else:
-			loggy.warn('gui.on_play_state_change got unknown state: ' + state)
+			loggy.warn('gui.on_play_state_change got unknown state: ' + self.player.state)
 	def is_play_button(self, widget):
 		#print 'playbutton found'
 		self.widgets['playbuttons'].append(widget)#TODO check for duplicates
@@ -115,22 +114,24 @@ class GTKGui(object):
 			return "%i:%02i:%02i" %(h,m,s)
 	def is_volume_scale(self, widget):
 		self.volume_scales.append(widget)
-		widget.set_adjustment(Gtk.Adjustment(value=self.player.getvol(), lower=0, upper=100, step_incr=5, page_incr=10, page_size=0))
+		widget.set_adjustment(Gtk.Adjustment(value=self.player.vol, lower=0, upper=100, step_incr=5, page_incr=10, page_size=0))
+		widget.connect('value-changed', self.on_volume_scale_change)
 		#widget.set_value(self.player.getvol())
 		#widget.set_from_icon_name(Gtk.STOCK_OPEN, 36)
-	def on_volume_change(self, volume):
+	def on_volume_change(self, caller):
 		for volume_scale in self.volume_scales:
-			volume_scale.set_value(volume)
+			if (int(round(volume_scale.get_value()))!=self.player.vol): 
+				volume_scale.set_value(self.player.vol)
 	def on_volume_scale_change(self, widget, value):
-		if (value == self.player.getvol()):
+		if (int(round(value)) == self.player.vol):
 			return True
-		self.player.setvol(value)
+		self.player.setvol(int(round(value)))
 	def is_info_label(self, widget):
 		self.widgets['info_labels'].append(widget)
 	def on_async_done(self, player):
 		loggy.debug('gui.on_async_done')
 		self.on_update_tags()
-	def on_update_tags(self):
+	def on_update_tags(self, *player):
 		text = ''
 		if 'title' in self.player.tags: #TODO do this after async done, not every time
 			text += self.player.tags['title']
@@ -143,12 +144,12 @@ class GTKGui(object):
 			label.set_label(text)
 		#TODO - get this on timer not on async
 		if 'image' in self.player.tags:
-			file = '/home/sam/.temp.img'
+			file = '/home/sam/.temp.img'#TODO replace file to temp file or better interface
 			img = open(file, 'w')
 			img.write(self.player.tags['image'])
 			img.close()
 			for album_art in self.album_arts:
-				album_arts.connect('draw', self.draw_album_art, album_art)
+				album_art.connect('draw', self.draw_album_art, album_art)
 				cairo.ImageSurface.create_from_png("w")
 				#album_art.set_from_file(file)
 				#self.on_image_resize(album_art, None)
@@ -183,7 +184,7 @@ class GTKGui(object):
 	def is_master_tree(self, widget):
 		self.main_trees.append(widget)
 		#self.main_tree_load()
-		widget.set_modobjectel(self.main_tree_store)
+		widget.set_model(self.main_tree_store)
 		widget.tv_column = Gtk.TreeViewColumn('Spambox')
 		widget.append_column(widget.tv_column)
 		widget.cell = Gtk.CellRendererText()
@@ -220,33 +221,34 @@ class GTKGui(object):
 	def slave_enter_media_view(self):
 		loggy.debug('gui.slave_enter_media_view')
 		#TODO check slave_window is a hbox
-		self.slave_view = GTK_media_view(self)
-		self.slave_windows[0].pack_start(self.slave_view, True, True)
+		self.slave_view = GTK_media_view(self.soundblizzard)
+		self.slave_windows[0].pack_start(self.slave_view, True, True,0)
 		self.slave_windows[0].show_all()
 		self.builder.connect_signals(self)
-	def slave_enter_now_playing_view(self):
+	def slave_enter_now_playing_view():
 		loggy.debug('gui.slave_enter_now_playing_view')
 	def slave_enter_preferences_view(self):
-		self.slave_view = GTK_preferences()
-		self.slave_windows[0].pack_start(self.slave_view, True, True)
+		self.slave_view = GTK_preferences(self.soundblizzard)
+		self.slave_windows[0].pack_start(self.slave_view, True, True,0)
 		self.slave_windows[0].show_all()
 		self.builder.connect_signals(self)
 class GTK_media_view(Gtk.HBox):
-	def __init__(self, gui):
+	def __init__(self, soundblizzard):
+		self.soundblizzard = soundblizzard
+		self.gui = soundblizzard.gtkgui
 		Gtk.HBox.__init__(self) # load glade
 		self.builder = Gtk.Builder()
 		self.builder.add_from_file('glade/media_view.glade')
 		widget = self.builder.get_object("vbox1")
 		widget.reparent(self)
 		self.builder.connect_signals(self)
-		self.gui = gui
 		self.keystoshow = ('artist', 'title', 'album', 'date', 'genre', 'duration', 'rating','mimetype', 'atime', 'mtime', 'ctime', 'dtime', 'size')
 		self.keystoshowdict = {} # dic of name, col position
 		for i, a in enumerate(self.keystoshow):
 			self.keystoshowdict[a] = i
 		#print self.keystoshowdict
 		#print 'GOOB' + str( player.sbdb.keytypelist )
-		self.list_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, str, str, )
+		self.list_store = Gtk.ListStore(*[str]*len(self.soundblizzard.sbdb.totkeys)) #creates list store with as many string columns as there are keys for
 		#print player.sbdb.get_uri_db_info("file:///home/sam/Music/POPCORN.MP3")
 		self.list_store.append(self.gui.sbdb.get_uri_db_info("file:///home/sam/Music/POPCORN.MP3"))
 		self.gui.sbdb.iter(self.list_store.append)
@@ -281,6 +283,7 @@ class GTK_media_view(Gtk.HBox):
 		(model, iter) = treeview.get_selection().get_selected()
 		if iter:
 			self.gui.player.load_uri(self.list_store.get_value(iter,0))
+			self.soundblizzard.playlist.playlist = [self.list_store.get_value(iter,0)]
 	def tv_clicked(self, widget, i):
 		loggy.debug('gui.GTK_media_view.tv_clicked')
 		widget.set_sort_column_id(i)
@@ -291,7 +294,8 @@ class GTK_media_view(Gtk.HBox):
 		#	widget.set_sort_order(Gtk.SORT_ASCENDING)
 
 class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/2129369/Gtk-builder-and-multiple-glade-files-breaks
-	def __init__(self):
+	def __init__(self, soundblizzard):
+		self.soundblizzard = soundblizzard
 		Gtk.HBox.__init__(self)
 		self.builder = Gtk.Builder()
 		self.builder.add_from_file('glade/preferences.glade')
@@ -304,8 +308,9 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 #	def __destroy__(self):
 #		loggy.log('GTK_media_view destroyed')
 #		self.builder.destroy()
-	def on_button3_clicked(self):
+	def on_button3_clicked(self, button):
 		loggy.debug('GTK_media_view.on_button3_clicked')
+		self.soundblizzard.sbdb.recreate_db()
 	def on_button2_clicked(self):
 		True
 	def on_button1_clicked(self):

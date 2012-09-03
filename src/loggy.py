@@ -1,5 +1,4 @@
-#TODO do i really need this?
-#TODO rename as core
+
 try:
 	import sys, time
 except:
@@ -16,21 +15,24 @@ debug_setting = False
 def __init__():
 	''
 def debug(message):
-	if debug_setting : print time.asctime() + ' :: ' + message.replace('\n', '|')
+	if debug_setting : print'\033[94m' + time.strftime('%x %X') + '- ' + message.replace('\n', '|') + '\033[0m'
 def log(message):
-	print '\033[94m' + time.asctime() + ' :: ' + message.replace('\n', '|') + '\033[0m'
+	print '\033[32m' + time.strftime('%x %X') + '- ' + message.replace('\n', '|') + '\033[0m'
 def warn(message):
-	message = time.asctime() + ' !Error! :: ' + message.replace('\n', '|')
+	message = '\033[31m' + time.strftime('%x %X') + '- ' + message.replace('\n', '|') + '\033[0m' 
 	print message
 	errors.append(message)#TODO test and fix log of warnings
 	if len(errors)>50:
 		warn('Maximum errors exceeded')
 def die(message):
-	print time.asctime() + ' !Fatal Error! :: ' + message.replace('\n', '|')
+	print '\033[91m' + time.strftime('%x %X') + '- ' + message.replace('\n', '|')+ '\033[0m'
 	quit()
-
 def quit():
 	sys.exit() #TODO tidy quit
 
 if __name__ == "__main__":
+	debug('Debug')
+	log('Log')
+	warn('Warn')
+	die('Die')
 	quit()

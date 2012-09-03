@@ -161,7 +161,6 @@ audio-volume-high
 audio-volume-low
 audio-volume-medium</property>
                 <property name="use_symbolic">True</property>
-                <signal name="value-changed" handler="on_volume_scale_change" swapped="no"/>
                 <signal name="map" handler="is_volume_scale" swapped="no"/>
               </object>
               <packing>

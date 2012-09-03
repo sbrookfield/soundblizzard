@@ -23,12 +23,17 @@ class mpdserver(object):
 		self.ok_queueing = False
 		self.player = soundblizzard.player
 		self.playlist = soundblizzard.playlist
+		self.sbdb = soundblizzard.sbdb
 	def startserver(self, host, port):
 		self.host = host
 		self.port = port
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.sock.bind((self.host, self.port)) #TODO check port empty first
+		try:
+			self.sock.bind((self.host, self.port)) #TODO check port empty first
+		except:
+			loggy.warn('mpdserver failed to start')
+			return False
 		self.sock.listen(1)
 		loggy.log('MPD Server Interface Running on ' + host + ':' + str(port) )
 		GObject.io_add_watch(self.sock, GObject.IO_IN, self.listener)
@@ -37,7 +42,7 @@ class mpdserver(object):
 		conn, addr = sock.accept()
 		loggy.log( "Connected from " + str(conn.getsockname()))
 		GObject.io_add_watch(conn, GObject.IO_IN, self.handler)
-		conn.send('OK MPD 0.15.0\n')
+		conn.send('OK MPD 0.16.0\n')
 		return True
 	def handler(self, conn, *args):
 		'''Asynchronous connection handler. Processes each line from the socket.'''
@@ -120,7 +125,7 @@ class mpdserver(object):
 					output += 'state: %s\n' % (self.player.state)
 					output += 'song: %i\n' % (1)
 					output += 'songid: %i\n' % (1)
-					output += 'time: %s.000\n' % (self.player.possec)
+					output += 'time: %s:%s\n' % (self.player.possec, self.player.dursec)
 					output += 'elapsed: %s.000\n' % (self.player.possec)
 					output += 'bitrate: %i\n' % (1)
 					output += 'audio: %s\n' % ('x')
@@ -191,8 +196,8 @@ class mpdserver(object):
 				elif command == 'playlistsearch':
 					output = 'OK\n'
 				elif command == 'plchanges':
-					self.trackdetails('file:///home/sam/Music/09 - Girl Talk - Make Me Wanna.mp3')
-					output = 'OK\n'
+					output = self.trackdetails(self.playlist.playlist)
+					output += 'OK\n'
 				elif command == 'plchangesposid':
 					output = 'OK\n'
 				elif command == 'shuffle':
@@ -302,11 +307,23 @@ class mpdserver(object):
 				conn.send(output)
 				#TODO if error
 		return True
-	def trackdetails (self, file):
-		values = self.player.db.get_row('music', 'filename', file)
-		loggy.log(str(values) + str(self.player.db.keys))
-		tags = dict(zip(self.player.db.keys, values))
-		loggy.log(str(tags))
+	def trackdetails (self, pl):
+		output = ""
+		for i in range (0, len(pl)):
+			uri = pl[i]
+			values = self.sbdb.get_uri_db_info(uri)
+			print str(values)+"\n"
+			
+			print type(values)
+			if (values == None):
+				output = 'ACK\n'
+				return output
+			output += "file: %s\nLast-Modified: %s\nTime: %s\nArtist: %s\nAlbumArtist: %s\nTitle: %s\nAlbum: %s Track: %s/%s\nDate: %s\nPos: %s\nId: %s\n" % \
+			(values['uri'], values['mtime'], values['duration'], values['artist'], values['album-artist'], values['title'], values['album'], \
+			values['track-number'], values['track-count'], values['date'],i,0)
+		print output
+		return output
+				
 if __name__ == "__main__":
 	player1 = player.player( None)
 	player1.load_file('/data/Music/Girl Talk/All Day/01 - Girl Talk - Oh No.mp3')

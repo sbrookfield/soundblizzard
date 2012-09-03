@@ -10,8 +10,18 @@ import sys
 from gi.repository import GObject
 def oot(fd, condition):
 	'''takes line from fd using readline and evals this, returning result of eval and any exceptions'''
-	try:
+	text = fd.readline()
+	sb = soundblizzard
+	if text.startswith('int'):
+		import code
+		import readline
+		import rlcompleter
+		readline.parse_and_bind("tab: complete")		
+		code.InteractiveConsole(globals()).interact()
+		return True
+	try:		
 		global soundblizzard
+		global sb
 		print(eval(fd.readline()))
 	except Exception as inst:
 		print inst
