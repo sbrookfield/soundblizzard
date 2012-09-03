@@ -4,7 +4,7 @@ Created on 20 Mar 2011
 @author: sam
 '''
 #try:
-import socket, loggy, player
+import socket, loggy, player, soundblizzard, sbdb, playlist
 from gi.repository import GObject
 #except:
 #    loggy.warn('Could not find required libraries: socket GObject loggy player')
@@ -18,12 +18,17 @@ class mpdserver(object):
 	def __init__(self, soundblizzard):
 		'''
 		'''
+		self.soundblizzard = soundblizzard
+		#assert(isinstance(self.soundblizzard, soundblizzard.soundblizzard))
+		self.soundblizzard.playlist
+		#self.soundblizzard.sbdb.
 		self.queue = ''
 		self.queueing = False
 		self.ok_queueing = False
 		self.player = soundblizzard.player
 		self.playlist = soundblizzard.playlist
 		self.sbdb = soundblizzard.sbdb
+		self.startserver(self.soundblizzard.config.config['mpdhost'],int(self.soundblizzard.config.config['mpdport']))
 	def startserver(self, host, port):
 		self.host = host
 		self.port = port
@@ -32,7 +37,7 @@ class mpdserver(object):
 		try:
 			self.sock.bind((self.host, self.port)) #TODO check port empty first
 		except:
-			loggy.warn('mpdserver failed to start')
+			loggy.warn('mpdserver failed to start on host %s port %s' % (self.host, self.port))
 			return False
 		self.sock.listen(1)
 		loggy.log('MPD Server Interface Running on ' + host + ':' + str(port) )
@@ -73,6 +78,7 @@ class mpdserver(object):
 					self.player.play()
 					output = 'OK\n'
 				elif command == 'next':
+					self.soundblizzard.playlist
 					output = 'OK\n' #TODO
 				elif command == 'pause':
 					self.player.pause()

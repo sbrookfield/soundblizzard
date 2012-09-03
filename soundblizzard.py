@@ -3,6 +3,7 @@
 ''' Main soundblizzard program'''
 from gi.repository import GObject
 mainloop = GObject.MainLoop()
+
 class soundblizzard():
 
 	def __init__(self):
@@ -21,7 +22,7 @@ class soundblizzard():
 		debug.soundblizzard = self
 		import mpdserver
 		self.mpdserver = mpdserver.mpdserver(self)
-		self.mpdserver.startserver('192.168.0.4', 6601)
+		#self.mpdserver.startserver('192.168.0.4', 6601)
 
 		import loggy
 		loggy.debug_setting = True
@@ -29,11 +30,11 @@ class soundblizzard():
 		#self.dbus_mpris = dbus_mpris.dbus_mpris(self)
 		import gui
 		self.gtkgui = gui.GTKGui(self)
-		None
+		
 
 if __name__ == "__main__":
-	soundblizzard = soundblizzard()
-	soundblizzard.playlist.load_playlist('ben')
+	sb = soundblizzard()
+	sb.playlist.load_playlist('ben')
 
 	mainloop.run()
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from gi.repository import GObject
 import pygst, loggy
-#pygst.require("0.10")
+pygst.require("0.10")
 import gst
 #TODO manage import dependencies
 class player(GObject.GObject):
@@ -86,7 +86,7 @@ class player(GObject.GObject):
 			self.emit('eos')
 		elif message.type == gst.MESSAGE_STATE_CHANGED:
 			if message.src == self.player:
-				state = self.updatestate()
+				self.updatestate()
 		elif message.type == gst.MESSAGE_STREAM_STATUS:
 			#loggy.log('ss') appears to be related to buffering status
 			#self.update_position()
