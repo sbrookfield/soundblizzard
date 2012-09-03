@@ -3,6 +3,7 @@
 Serves Soundblizzard on Dbus - hopefully MPRIS compatible
 Source from EXAILE - many thanks
 '''
+
 import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
