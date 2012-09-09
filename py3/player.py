@@ -17,7 +17,7 @@ class player(GObject.GObject):
 					'vol-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,
 										()),
 					}
-#    def debug(self, widget, param):#TODO is this needed?
+#    def debug(self, widget, param):#TODO: is this needed?
 #        print (('temp' + str(widget) + str(param)))
 	def __init__(self):  #Thanks to http://pyGstdocs.berlios.de/pyGst-tutorial/playbin.html
 		GObject.GObject.__init__(self)
@@ -57,7 +57,7 @@ class player(GObject.GObject):
 		print('go!')
 		print (self.bus.pop())
 		return
-		if message.type == Gst.MESSAGE_EOS: #TODO reorder for speed , or take signals out individually...
+		if message.type == Gst.MESSAGE_EOS: #TODO: reorder for speed , or take signals out individually...
 			self.get_next()
 		elif message.type == Gst.MESSAGE_ERROR:
 			self.reset()
@@ -101,7 +101,7 @@ class player(GObject.GObject):
 				loggy.log( "Player GST message unhandled:" + str(message.type))
 		else:
 			loggy.warn('Player - unknown messge' + str(message.type))
-		#TODO remove message from buffer?
+		#TODO: remove message from buffer?
 		#self.update_play_state()
 #    def on_sync_message(self, bus, message):
 #        loggy.warn('Player got sync message, unhandled')
@@ -128,7 +128,7 @@ class player(GObject.GObject):
 		if (pos<(self.dur) and pos>=0):
 			self.player.seek_simple(Gst.FORMAT_TIME, Gst.SEEK_FLAG_FLUSH, (pos*SECOND))
 			loggy.log('seeking to |' + str(pos) + '|')
-			return True #TODO convert setpos/getpos to seconds
+			return True #TODO: convert setpos/getpos to seconds
 		else:
 			loggy.log('player.seeksecs could not understand seek to ' + str(pos))
 			return False

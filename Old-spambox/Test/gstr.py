@@ -38,7 +38,7 @@ class gstr(object):
 	def on_message(self, bus, message):
 		if message.type == gst.MESSAGE_EOS:
 			self.reset()
-			#TODO get next song
+			#TODO: get next song
 		elif message.type == gst.MESSAGE_ERROR:
 			self.reset()
 			err, debug = message.parse_error()
@@ -48,11 +48,11 @@ class gstr(object):
 		elif message.type == gst.MESSAGE_STREAM_STATUS:
 			self.update_play_state()
 #        elif message.type == gst.MESSAGE_NEW_CLOCK:
-#            None #TODO
+#            None #TODO:
 #        elif message.type == gst.MESSAGE_QOS:
-#            None #TODO
+#            None #TODO:
 		elif message.type == gst.MESSAGE_ASYNC_DONE:
-			None #TODO
+			None #TODO:
 		elif message.type == gst.MESSAGE_TAG: # thanks to http://www.jezra.net/blog/use_python_and_gstreamer_to_get_the_tags_of_an_audio_file
 			taglist = message.parse_tag()
 			for key in taglist.keys():
@@ -71,7 +71,7 @@ class gstr(object):
 			self.duration = datetime.timedelta(seconds=(self.dur / gst.SECOND))
 			loggy.log(str(self.duration))
 #        elif message.type == gst.MESSAGE_ELEMENT:
-#            None #TODO
+#            None #TODO:
 		else:
 			loggy.log( "Player GST message unhandled:" + str(message.type))
 		#self.update_play_state()

@@ -5,11 +5,11 @@ Created on 8 Apr 2012
 '''
 import sys, json, os, loggy
 class config(object):
-	#TODO add support for command line args
+	#TODO: add support for command line args
 	def __init__(self, soundblizzard):
 		#load defaults first then config file then command line args
 		self.config = { 'configfile' : os.path.expanduser('~/.config/soundblizzard/soundblizzard.conf'),
-									'libraryfolders' : ['~/music'], #TODO support multiple folders
+									'libraryfolders' : ['~/music'], #TODO: support multiple folders
 									'playlistfolder' : '~/.config/playlists',
 									'databasefile' : os.path.expanduser('~/.config/sounblizzard/soundblizzard.db'),
 									'mpdhost' : 'localhost',
@@ -27,7 +27,7 @@ class config(object):
 		#Handle command line arguments	
 		#Splits command line args into dict, if key starts with -- then takes this as an argument and prints these
 		# if key is help prints defaults
-		#TODO improve command line argument recognition
+		#TODO: improve command line argument recognition
 		a = sys.argv[1:]
 		if len(a) % 2:
 			a.append('')

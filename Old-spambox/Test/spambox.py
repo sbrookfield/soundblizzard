@@ -17,7 +17,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #!/usr/bin/env python
 
-#TODO Press play when no file loaded causes error
+#TODO: Press play when no file loaded causes error
 try:
 import pygtk
 pygtk.require("2.0")
@@ -143,17 +143,17 @@ def on_message(self, bus, message):
 	elif t == gst.MESSAGE_STREAM_STATUS:
 	  self.update_play_state()
 	elif t == gst.MESSAGE_NEW_CLOCK:
-	  None #TODO
+	  None #TODO:
 	#elif t == gst.MESSAGE_QOS:
-	#	None #TODO
+	#	None #TODO:
 	elif t == gst.MESSAGE_ASYNC_DONE:
-	  None #TODO
+	  None #TODO:
 	elif t == gst.MESSAGE_TAG:
-	  None #TODO
+	  None #TODO:
 	elif t == gst.MESSAGE_DURATION:
-	  None #TODO
+	  None #TODO:
 	elif t == gst.MESSAGE_ELEMENT:
-	  None #TODO
+	  None #TODO:
 	else:
 	  print t #handle theses
 	self.update_play_state()
@@ -170,7 +170,7 @@ def on_sync_message(self, bus, message):
 def on_imagemenuitem11_activate (self, widget, data=None):
 	import preferences
 	preferences.Main()
-#TODO should i be using separate gtkbuilder? or same? - see start of pref module
+#TODO: should i be using separate gtkbuilder? or same? - see start of pref module
 def load_master_tree(self):
 	self.master_store =  gtk.TreeStore(str)
 	self.master_view.set_model(self.master_store)

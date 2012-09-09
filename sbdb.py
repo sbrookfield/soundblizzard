@@ -16,7 +16,7 @@ class sbdb(GObject.GObject):
 		if (not(os.path.isdir(os.path.dirname(self.config['databasefile'])))):
 			loggy.warn ('Creating directories for requested database file')
 			os.makedirs(os.path.dirname(self.config['databasefile'])) or loggy.warn ('...could not create config dir')
-		self.dbpath = self.config['databasefile'] #TODO test db folder exists and allow ~ to mean home
+		self.dbpath = self.config['databasefile'] #TODO: test db folder exists and allow ~ to mean home
 		loggy.log("Database: Loading database from " + self.dbpath)
 		self.conn = sqlite3.connect(self.dbpath) or loggy.warn('Could not connect to database')
 		self.conn.row_factory = sqlite3.Row
@@ -24,12 +24,12 @@ class sbdb(GObject.GObject):
 		self.conn.row_factory = sqlite3.Row
 		self.keys = ('uri', 'artist', 'title', 'album', 'date', 'genre', 'duration', 'rating','album-artist', 'track-count', 'track-number') # + mimetype , atime, mtime, ctime, dtime
 		self.addkeys = ('mimetype', 'atime', 'mtime', 'ctime', 'dtime', 'size')
-		self.totkeys = self.keys + self.addkeys
+		self.totkeys = self.keys + self.addkeys +('songid',)
 		self.blanktags ={} # creates blank key set so no type errors when key looked up does not exist
 		for key in self.totkeys:
-			self.blanktags[key] = None # TODO move gubbins to config
+			self.blanktags[key] = None # TODO: move gubbins to config
 		self.conn.commit()
-		#TODO check database is okay, contains tables and necessary fields etc.
+		#TODO: check database is okay, contains tables and necessary fields etc.
 		#self.conn.close()
 	def sqlexec(self, string):
 		loggy.log('Database sqlexec:' + string)
@@ -37,13 +37,22 @@ class sbdb(GObject.GObject):
 		#self.conn.commit()
 	def create_table(self, name, fields):
 		self.sqlexec('create table if not exists "%s" ( "%s" )' % (name, '" , "'.join(fields)))
+	def recreate_media_table(self,fields):
+		self.sqlexec('drop table if exists \'media\' ')
+		self.sqlexec('create table if not exists "%s" ( "%s" INTEGER PRIMARY KEY ASC )' % ('media', '" , "'.join(fields)))
+
+		#NB id must be last to make primary key
 	def recreate_table(self, name, fields):
 		self.sqlexec('drop table if exists "%s" ' % name)
 		self.sqlexec('create table "%s" ("%s")' % (name, '" , "'.join(fields)))
-	def insert_row(self, table, data):
-		self.emit('database-changed')
-		data = [str(item) for item in data]
-		self.sqlexec('insert into "%s" values ( "%s" )' % (table, str('" , "'.join(data))))
+#	def insert_row(self, table, data):
+#		self.emit('database-changed')
+#		data = [str(item) for item in data]
+#		self.sqlexec('insert into "%s" values ( "%s" )' % (table, str('" , "'.join(data))))
+	def insert_media(self, data):
+		data = tuple(data)
+		string = "insert into 'media' values ( ?" + " , ? "*(len(data)-1) + " )"
+		self.curs.execute(string, data)
 	def delete_row(self, table, field, value):
 		self.emit('database-changed')
 		self.sqlexec('delete from "%s" where "%s"="%s"' % (table, field, value))
@@ -52,18 +61,34 @@ class sbdb(GObject.GObject):
 		return self.curs.fetchone()
 	def iter(self, callback):
 		self.curs.execute('select * from media')
-		for row in self.curs:
-			callback(row)
+		row_arr = []
+		for row_array in self.curs:
+			for i in row_array:
+				row_arr.append(unicode(i))
+			callback(row_arr)
+			row_arr=[]
+	def get_types(self):
+		self.curs.execute('select * from media')
+		temp = self.curs.fetch()
+		print temp
 	def get_uri_db_info(self, uri):
 		self.sqlexec('select * from "media" where "uri"="' + uri + '" ')
-		#return zip((self.totkeys), self.curs.fetchone())
 		return self.curs.fetchone()
-	def get_uri_db_info_dict(self, uri):
-		self.sqlexec('select * from "media" where "uri"="' + uri + '" ')
-		print self.curs.fetchone()
-		return zip((self.totkeys), list(self.curs.fetchone()))
+	def get_id_db_info(self, songid):
+		self.sqlexec('select * from "media" where "songid"="' + str(songid) + '" ')
+		return self.curs.fetchone()
+		#return zip((self.totkeys), self.curs.fetchone())
+#	def get_uri_db_info_with_id(self,uri):
+#		self.sqlexec('select * from "media" where "uri"="' + uri + '" ')
+#		return self.curs.lastrowid,self.curs.fetchone()
+#	def get_uri_db_info_dict(self, uri):
+#		self.sqlexec('select * from "media" where "uri"="' + uri + '" ')
+#		print self.curs.fetchone()
+#		return zip((self.totkeys), list(self.curs.fetchone()))
 	def recreate_db(self):
-		self.recreate_table("media", (self.keys + self.addkeys)) #TODO delete database and restart from scratch
+		#keys = self.keys + self.addkeys +('\'id\' INTEGER PRIMARY KEY ASC',) # makes sure id defined as primary key
+		
+		self.recreate_media_table((self.totkeys)) #TODO: delete database and restart from scratch
 		#self.recreate_table("videos", self.keys)
 		#self.insert_row('music', ['fart.avi', 'farter', 'fart song'])
 		self.totag = []
@@ -74,7 +99,7 @@ class sbdb(GObject.GObject):
 			loggy.log('ELE '+folder)
 			for path, dirs, files in os.walk(folder):
 				for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files ]:
-					mime = mimetypes.guess_type(filename)[0] #TODO get rid of mimetype
+					mime = mimetypes.guess_type(filename)[0] #TODO: get rid of mimetype
 					if not mime:
 						None
 					elif mime.startswith("audio"):
@@ -123,20 +148,21 @@ class sbdb(GObject.GObject):
 						row.append('')
 				row.append(type)
 				#(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.tagger.filename)
-				row = row + [1,2,3,4,5]
+				row = row + [1,2,3,4,5] + [None]
 				#print row
-				self.insert_row('media', row)
+				self.insert_media(row)
 				#self.insert_row(type, [self.tagger.filename, self.tagger.tags['artist'], self.tagger.tags['title']])
 			#except:
-				#loggy.log('OOOOOOOOOOOOOOOOOOOOOOOOOOOO')#TODO - deal with errors properly
+				#loggy.log('OOOOOOOOOOOOOOOOOOOOOOOOOOOO')#TODO: - deal with errors properly
 		self.gettag()
-		#TODO convert to gio/uris, see test/gio       stat, etc
+		#TODO: convert to gio/uris, see test/gio       stat, etc
 
 
 
 
 if __name__ == "__main__":
 	db = sbdb()
-	db.recreate_db()
+	db.get_types()
+	#db.recreate_db()
 
 

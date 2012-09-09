@@ -34,7 +34,7 @@ def __init__(self, player, sbdb):
 	for window in self.widgets['window']:
 	window.show()
 	self.window.show()
-	#self.window.fullscreen() #TODO fullscreen
+	#self.window.fullscreen() #TODO: fullscreen
 
 	self.get_widgets('albumartdrawingarea')
 	for alb in self.widgets['albumartdrawingarea']:
@@ -87,7 +87,7 @@ def on_play_state_change(self, state):
 	loggy.warn('gui.on_play_state_change got unknown state: ' + state)
 def is_play_button(self, widget):
 	#print 'playbutton found'
-	self.playbuttons.append(widget)#TODO check for duplicates
+	self.playbuttons.append(widget)#TODO: check for duplicates
 def on_progress_bar_change_value (self, range, scroll, value, data=None):
 	self.player.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, value)
 def is_progress_bar(self, widget):
@@ -122,16 +122,16 @@ def on_async_done(self, player):
 	self.on_update_tags()
 def on_update_tags(self):
 	text = ''
-	if 'title' in self.player.tags: #TODO do this after async done, not every time
+	if 'title' in self.player.tags: #TODO: do this after async done, not every time
 	text += self.player.tags['title']
 	if 'artist' in self.player.tags:
 	text += '\n by ' + self.player.tags['artist']
 	if 'album' in self.player.tags:
-	text += ' from ' + self.player.tags['album'] #TODO make font italic
+	text += ' from ' + self.player.tags['album'] #TODO: make font italic
 	print text
 	for label in self.info_labels:
 	label.set_label(text)
-	#TODO - get this on timer not on async
+	#TODO: - get this on timer not on async
 	if 'image' in self.player.tags:
 	file = self.sbdb.config.get('Main', 'imagefile')
 	img = open(file, 'w')
@@ -146,17 +146,17 @@ def is_album_art(self, widget):
 #	def redraw_album_art(self, widget, event):
 #		print 'image redraw'
 #		x , y, width, height = event.area
-#		file = self.sbdb.config.get('Main', 'imagefile') #TODO - does this result in file read?
+#		file = self.sbdb.config.get('Main', 'imagefile') #TODO: - does this result in file read?
 #		pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(file, width , height)
 #		widget.draw_pixbuf(widget.get_style().fg_gc[STATE_NORMAL],pixbuf, x, y, x, y, width, height, gtk.gdk.RGB_DITHER_NONE, 0 , 0)
 #
-def on_image_resize(self, widgetty, event): #TODO on_image_resize
+def on_image_resize(self, widgetty, event): #TODO: on_image_resize
 	print 'image resize'
 	#src_width, src_height = widget.get_pixmap().get_width(), widget.get_pixmap().get_height()
 	#allocation = widget.get_allocation()# thanks to http://stackoverflow.com/questions/4939734/automatic-image-scaling-on-resize-with-pygtk
 	#ben = widget.get_pixbuf()
 	for widget in self.album_arts:
-	file = self.sbdb.config.get('Main', 'imagefile') #TODO - does this result in file read?
+	file = self.sbdb.config.get('Main', 'imagefile') #TODO: - does this result in file read?
 	pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(file,widget.allocation.height , widget.allocation.width)
 	#pixbuf = widget.get_pixbuf().scale_simple(widget.allocation.width, widget.allocation.height, gtk.gdk.INTERP_BILINEAR)
 	widget.set_from_pixbuf(pixbuf)
@@ -177,7 +177,7 @@ def is_master_tree(self, widget):
 	widget.set_reorderable(True)
 	widget.connect('cursor-changed', self.master_tree_cursor_changed)
 def master_tree_cursor_changed(self, widget):
-	#TODO set position in all trees
+	#TODO: set position in all trees
 	loggy.debug('gui.master_tree_cursor_changed')
 	(model, iter) = widget.get_selection().get_selected()
 	#print self.slave_windows[0].get_children()
@@ -198,16 +198,16 @@ def master_tree_load(self):
 	self.master_tree_add('Media', self.slave_enter_media_view)
 	self.master_tree_add('Preferences', self.slave_enter_preferences_view)
 
-#TODO connect signals other than map automatically
+#TODO: connect signals other than map automatically
 def is_slave_area(self, widget):
 	loggy.debug('gui.is_slave_area')
 	print
 	print '\n'
 	print
-	self.slave_windows.append(widget) #TODO allow multiple separate master/slave combos
+	self.slave_windows.append(widget) #TODO: allow multiple separate master/slave combos
 def slave_enter_media_view(self):
 	loggy.debug('gui.slave_enter_media_view')
-	#TODO check slave_window is a hbox
+	#TODO: check slave_window is a hbox
 	self.slave_view = GTK_media_view(self)
 	self.slave_windows[0].pack_start(self.slave_view, True, True)
 	self.slave_windows[0].show_all()

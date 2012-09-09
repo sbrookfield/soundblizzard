@@ -85,7 +85,7 @@ class player(GObject.GObject):
 		self.emit('hemisecond')
 		return True
 	def load_file(self, filename):
-		self.load_uri('file://' + filename) #TODO make all uri
+		self.load_uri('file://' + filename) #TODO: make all uri
 	def load_uri(self, uri):
 		self.reset()
 		loggy.log( "Player loading " + uri )
@@ -97,7 +97,7 @@ class player(GObject.GObject):
 		#for tag in self.
 		self.tags = {}
 	def on_message(self, bus, message):
-		if message.type == gst.MESSAGE_EOS: #TODO reorder for speed , or take signals out individually...
+		if message.type == gst.MESSAGE_EOS: #TODO: reorder for speed , or take signals out individually...
 			self.get_next()
 		elif message.type == gst.MESSAGE_ERROR:
 			self.reset()
@@ -156,7 +156,7 @@ class player(GObject.GObject):
 				loggy.log( "Player GST message unhandled:" + str(message.type))
 		else:
 			loggy.warn('Player - unknown messge' + str(message.type))
-		#TODO remove message from buffer?
+		#TODO: remove message from buffer?
 		#self.update_play_state()
 #    def on_sync_message(self, bus, message):
 #        loggy.warn('Player got sync message, unhandled')
@@ -177,7 +177,7 @@ class player(GObject.GObject):
 		if (pos<(self.dur) and pos>=0):
 			self.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, pos)
 			loggy.log('seeking to |' + str(secs) + '|')
-			return True #TODO check pipeline changes?
+			return True #TODO: check pipeline changes?
 		else:
 			loggy.log('player.seeksecs could not understand seek to ' + str(secs))
 			return False
@@ -229,7 +229,7 @@ class player(GObject.GObject):
 		if (dur<pos or dur<1): dur=pos +1
 		for comm in self.on_update_position:
 			comm(pos, dur)
-		True #TODO update hscale
+		True #TODO: update hscale
 	def update_volume(self):
 		volume = self.getvol()
 		for comm in self.on_update_volume:

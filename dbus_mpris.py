@@ -41,7 +41,7 @@ class dbus_mpris_player(dbus.service.Object):
 	def __init__(self, soundblizzard, bus):
 		dbus.service.Object.__init__(self, bus, '/Player')
 		self.soundblizzard = soundblizzard
-		#TODO implement signals
+		#TODO: implement signals
 	@dbus.service.method(INTERFACE_NAME)
 	def Next(self):
 		"""

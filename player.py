@@ -3,7 +3,9 @@ from gi.repository import GObject
 import pygst, loggy
 pygst.require("0.10")
 import gst
-#TODO manage import dependencies
+#TODO: manage import dependencies
+#TODO: use xrange instead of range, see http://wiki.python.org/moin/PythonSpeed/PerformanceTips
+#TODO: try profiling http://wiki.python.org/moin/PythonSpeed/PerformanceTips
 class player(GObject.GObject):
 	'''
 	Player - gst player object
@@ -65,7 +67,7 @@ class player(GObject.GObject):
 #	def debug(self, message=None):
 #		loggy.log(str(message))
 	def load_file(self, filename):
-		self.load_uri('file://' + filename) #TODO make all uri
+		self.load_uri('file://' + filename) #TODO: make all uri
 	def load_uri(self, uri):
 		self.reset()
 		loggy.log( "Player loading " + uri )
@@ -77,7 +79,7 @@ class player(GObject.GObject):
 		#for tag in self.
 		self.tags = self.soundblizzard.sbdb.blanktags
 	def on_message(self, bus, message):
-		if message.type == gst.MESSAGE_EOS: #TODO reorder for speed , or take signals out individually...
+		if message.type == gst.MESSAGE_EOS: #TODO: reorder for speed , or take signals out individually...
 			self.emit('eos')#called when end of stream reached
 		elif message.type == gst.MESSAGE_ERROR:
 			self.reset()
@@ -123,7 +125,7 @@ class player(GObject.GObject):
 				loggy.log( "Player GST message unhandled:" + str(message.type))
 		else:
 			loggy.warn('Player - unknown messge' + str(message.type))
-		#TODO remove message from buffer?
+		#TODO: remove message from buffer?
 	def play(self):
 		self.player.set_state(gst.STATE_PLAYING)
 	def pause(self):
@@ -141,7 +143,7 @@ class player(GObject.GObject):
 		if (posns<(self.durns) and posns>=0):
 			self.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, posns)
 			loggy.log('seeking to |' + str(posns) + 'ns|')
-			return True #TODO check pipeline changes?
+			return True #TODO: check pipeline changes?
 		else:
 			loggy.log('player.seeksecs could not understand seek to ' + str(posns))
 			return False

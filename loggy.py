@@ -3,12 +3,12 @@ try:
 	import sys, time
 except:
 	warn('Could not find required python libraries: sys, time')
-#TODO use in all code
+#TODO: use in all code
 '''
 	Spambox Log Functions
 	'''
-#TODO make log color green warn orange, die red
-#TODO count calls of each log / function call
+#TODO: make log color green warn orange, die red
+#TODO: count calls of each log / function call
 #Have a null version of loggy for speed
 errors=[]
 debug_setting = False
@@ -21,14 +21,14 @@ def log(message):
 def warn(message):
 	message = '\033[31m' + time.strftime('%x %X') + '- ' + message.replace('\n', '|') + '\033[0m' 
 	print message
-	errors.append(message)#TODO test and fix log of warnings
+	errors.append(message)#TODO: test and fix log of warnings
 	if len(errors)>50:
 		warn('Maximum errors exceeded')
 def die(message):
 	print '\033[91m' + time.strftime('%x %X') + '- ' + message.replace('\n', '|')+ '\033[0m'
 	quit()
 def quit():
-	sys.exit() #TODO tidy quit
+	sys.exit() #TODO: tidy quit
 
 if __name__ == "__main__":
 	debug('Debug')

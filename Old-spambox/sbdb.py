@@ -44,7 +44,7 @@ class sbdb(object):
 		#return zip((self.totkeys), self.curs.fetchone())
 		return self.curs.fetchone()
 	def recreate_db(self):
-		self.recreate_table("media", (self.keys + self.addkeys)) #TODO delete database and restart from scratch
+		self.recreate_table("media", (self.keys + self.addkeys)) #TODO: delete database and restart from scratch
 		#self.recreate_table("videos", self.keys)
 		#self.insert_row('music', ['fart.avi', 'farter', 'fart song'])
 		self.totag = []
@@ -55,7 +55,7 @@ class sbdb(object):
 			loggy.log('ELE '+folder)
 			for path, dirs, files in os.walk(folder):
 				for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files ]:
-					mime = mimetypes.guess_type(filename)[0] #TODO get rid of mimetype
+					mime = mimetypes.guess_type(filename)[0] #TODO: get rid of mimetype
 					if not mime:
 						None
 					elif mime.startswith("audio"):
@@ -109,9 +109,9 @@ class sbdb(object):
 				self.insert_row('media', row)
 				#self.insert_row(type, [self.tagger.filename, self.tagger.tags['artist'], self.tagger.tags['title']])
 			#except:
-				#loggy.log('OOOOOOOOOOOOOOOOOOOOOOOOOOOO')#TODO - deal with errors properly
+				#loggy.log('OOOOOOOOOOOOOOOOOOOOOOOOOOOO')#TODO: - deal with errors properly
 		self.gettag()
-		#TODO convert to gio/uris, see test/gio       stat, etc
+		#TODO: convert to gio/uris, see test/gio       stat, etc
 
 
 

@@ -12,7 +12,7 @@ except:
 class tagger(object):
 	'''
 	Tagger - opens gstreamer pipeline, gets tags and duration
-	''' #TODO Meta mux stream? Tidy all starts to files!, comments
+	''' #TODO: Meta mux stream? Tidy all starts to files!, comments
 	def init(self):  #wait till load_file?
 		self.player = gst.parse_launch('uridecodebin name=source ! fakesink')
 		self.source = self.player.get_by_name("source")
@@ -61,14 +61,14 @@ class tagger(object):
 			self.tags['duration'] = int ((self.player.query_duration(gst.FORMAT_TIME)[0]) / gst.SECOND)
 			self.tags['date'] = self.tags['date'].year
 			self.player.set_state(gst.STATE_NULL)
-			#TODO replace mime types with gstreamer alternative from gst.extend
+			#TODO: replace mime types with gstreamer alternative from gst.extend
 			self.callback()
 		elif message.type == gst.MESSAGE_DURATION:
 			self.tags['duration'] = int ((self.player.query_duration(gst.FORMAT_TIME)[0]) / gst.SECOND)
 			#loggy.log('duration xx' + str(self.tags['length']))
 		elif message.type == gst.MESSAGE_ERROR:
 			err, debug = message.parse_error()
-			loggy.warn( "Player GST_MESSAGE_ERROR: " + str(err) + str(debug)) #TODO sort out unicode
+			loggy.warn( "Player GST_MESSAGE_ERROR: " + str(err) + str(debug)) #TODO: sort out unicode
 			self.callback()
 		else:
 			None

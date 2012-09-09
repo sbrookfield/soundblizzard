@@ -33,5 +33,5 @@ if __name__ == "__main__":
 	player1.playlist = playlist(player1)
 
 	gobject.MainLoop().run()
-	#todo handle address lost
+	#TODO: handle address lost
 

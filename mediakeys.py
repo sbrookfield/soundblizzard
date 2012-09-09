@@ -22,7 +22,7 @@ class mediakeys(object):
 			self.soundblizzard.player.playpause()
 		elif command =='Next':
 			print ('poo')
-		#TODO implement other keys
+		#TODO: implement other keys
 if __name__ == "__main__":
 	mediakeys( 'b')
 	GObject.MainLoop().run()

@@ -3,7 +3,7 @@ try:
 except:
 	loggy.warn('config - Could not find required libraries: ConfigParser')
 
-class config( ConfigParser.SafeConfigParser ): #TODO use linux format, not ini (could not find suitable python module
+class config( ConfigParser.SafeConfigParser ): #TODO: use linux format, not ini (could not find suitable python module
 	def load(self):
 		self.file = os.path.expanduser('~') + "/.spambox/spambox.ini"
 		self.read(self.file)

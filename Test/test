@@ -1,0 +1,10 @@
+def is_single_toggle(self, widget):
+		self.widgets['single_toggles'].append(widget)
+		self.single_toggle_update()
+		widget.connect('toggled', self.on_single_toggle)
+	def on_single_toggle(self, widget):
+		if self.playlist.single != widget.get_active():
+			self.playlist.single = widget.get_active()
+		loggy 'toggle button ' + str(widget.get_active())
+	def single_toggle_update(self):
+		None #TODO get single toggle to change when it is changed elsewhere
