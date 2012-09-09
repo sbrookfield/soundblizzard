@@ -35,6 +35,8 @@ class soundblizzard():
 if __name__ == "__main__":
 	sb = soundblizzard()
 	sb.playlist.load_playlist('ben')
+	sb.playlist.get_next()
+	sb.player.pause()
 
 	mainloop.run()
 

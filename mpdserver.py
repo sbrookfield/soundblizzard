@@ -131,11 +131,8 @@ class mpdserver(object):
 		return output
 		#TODO: tidy	this function					
 						
-						
-						
-						
-	def play(self, arg):
-		return 'OK\n'
+								
+#Command list functions
 	def command_list_begin(self, arg):
 		self.queueing = True
 		return ''
@@ -148,8 +145,53 @@ class mpdserver(object):
 		output = self.queue + 'OK\n'
 		self.queue = ''
 		return output
-		
-	def test(self):
+#Querying MPD Status
+	def clearerror(self, arg):
+		return 'OK\n'
+	def currentsong(self, arg):
+			output = 'file: %s\n' % (self.sb.player.uri)#TODO: convert from uri low priority
+			output += 'Last-Modified: 2012-08-21T21:18:58Z\n' # TODO: change to format instead of % and not +=
+			output += 'Time: %i\n' % (self.sb.player.dursec)
+			output += 'Artist: %s\n' % str(self.sb.player.tags.get('artist'))
+			output += 'AlbumArtist: %s\n' % str(self.sb.player.tags.get('album-artist'))
+			output += 'Title: %s\n' % str(self.sb.player.tags.get('title'))
+			output += 'Album: %s\n' % str(self.sb.player.tags.get('artist'))
+			output += 'Track: %s\n' % (str(self.sb.player.tags.get('track-number'))+'/'+str(self.sb.player.tags.get('track-count')))
+			output += 'Date: %s\n' % str(self.sb.player.tags.get('date').year)
+			output += 'Genre: %s\n' % str(self.sb.player.tags.get('genre'))
+			output += 'Pos: %i\n' % (self.sb.playlist.position)
+			output += 'Id: %i\n' % (self.sb.sbdb.get_uri_db_info(self.sb.player.uri)['songid'])#TODO: put all info into tags
+			output += 'OK\n'
+			return output
+	def idle(self, arg):
+		return 'changed: database update stored_playlist playlist player mixer output options sticker subscription message\nOK\n'#TODO: handle properly
+	def status(self, arg):
+		output = 'volume: %i\n' % (self.sb.player.vol) #TODO: get rid of % and +=
+		output += 'repeat: %i\n' % (int(self.sb.playlist.repeat))
+		output += 'random: %i\n' % (int(self.sb.playlist.random))
+		output += 'single: %i\n' % (int(self.sb.playlist.single))
+		output += 'consume: %i\n' % (int(self.sb.playlist.consume))
+		output += 'playlist: %i\n' % (1)
+		output += 'playlistlength: %i\n' % (2)
+		output += 'xfade: %i\n' % (0)
+		output += 'state: %s\n' % (self.sb.player.state)
+		output += 'song: %i\n' % (1)
+		output += 'songid: %i\n' % (1)
+		output += 'time: %s:%s\n' % (self.sb.player.possec, self.sb.player.dursec)
+		output += 'elapsed: %s.000\n' % (self.sb.player.possec)
+		output += 'bitrate: %i\n' % (1)
+		output += 'audio: %s\n' % ('x')
+		output += 'nextsong: %i\n' % (1)
+		output += 'nextsongid: %i\n' % (1)
+		output += 'OK\n'
+		return output
+	def stats(self, arg):
+		return 'artists: %i\nalbums: %i\nsongs: %i\nuptime: %i\nplaytime: %i\ndb_playtime: %i\ndb_update: %i\nOK\n' % (1,1,1,1,1,1,1) #TODO: stats
+
+	
+	def play(self, arg):
+		return 'OK\n'	
+	def test(self, arg):
 		command = ''
 		args = ''
 		if command == 'play':
@@ -185,48 +227,7 @@ class mpdserver(object):
 		elif command == 'stop':
 			self.sb.player.stop()
 			output = 'OK\n'
-		#Status
-		elif command == 'clearerror':#TODO: implement low priority
-			print 'Recognised command clearerror'
-			output = 'OK'
-		elif command == 'currentsong':
-			output += 'file: %s\n' % (self.sb.player.uri)#TODO: convert from uri low priority
-			output += 'Last-Modified: 2012-08-21T21:18:58Z\n'
-			output += 'Time: %i\n' % (self.sb.player.dursec)
-			output += 'Artist: %s\n' % str(self.sb.player.tags.get('artist'))
-			output += 'AlbumArtist: %s\n' % str(self.sb.player.tags.get('album-artist'))
-			output += 'Title: %s\n' % str(self.sb.player.tags.get('title'))
-			output += 'Album: %s\n' % str(self.sb.player.tags.get('artist'))
-			output += 'Track: %s\n' % (str(self.sb.player.tags.get('track-number'))+'/'+str(self.sb.player.tags.get('track-count')))
-			output += 'Date: %s\n' % str(self.sb.player.tags.get('date').year)
-			output += 'Genre: %s\n' % str(self.sb.player.tags.get('genre'))
-			output += 'Pos: %i\n' % (self.sb.playlist.position)
-			output += 'Id: %i\n' % (self.sb.sbdb.get_uri_db_info()['id']) #TODO
-			output += 'OK\n'
-		elif command == 'idle':
-			output = 'changed: database update stored_playlist playlist player mixer output options sticker subscription message\nOK\n'#TODO: handle properly
-		elif command == 'status':
-			output += 'volume: %i\n' % (self.sb.player.vol)
-			output += 'repeat: %i\n' % (int(self.sb.playlist.repeat))
-			output += 'random: %i\n' % (int(self.sb.playlist.random))
-			output += 'single: %i\n' % (int(self.sb.playlist.single))
-			output += 'consume: %i\n' % (int(self.sb.playlist.consume))
-			output += 'playlist: %i\n' % (1)
-			output += 'playlistlength: %i\n' % (2)
-			output += 'xfade: %i\n' % (0)
-			output += 'state: %s\n' % (self.sb.player.state)
-			output += 'song: %i\n' % (1)
-			output += 'songid: %i\n' % (1)
-			output += 'time: %s:%s\n' % (self.sb.player.possec, self.sb.player.dursec)
-			output += 'elapsed: %s.000\n' % (self.sb.player.possec)
-			output += 'bitrate: %i\n' % (1)
-			output += 'audio: %s\n' % ('x')
-			output += 'nextsong: %i\n' % (1)
-			output += 'nextsongid: %i\n' % (1)
-			output += 'OK\n'
-		elif command == 'stats':
-			print 'Recognised status command'
-			output = 'artists: %i\nalbums: %i\nsongs: %i\nuptime: %i\nplaytime: %i\ndb_playtime: %i\ndb_update: %i\nOK\n' % (1,1,1,1,1,1,1)
+
 		#Playback Options
 		elif command == 'consume':
 			print 'Recognised consume command'

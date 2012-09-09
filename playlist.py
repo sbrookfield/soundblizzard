@@ -27,7 +27,7 @@ class playlist(GObject.GObject):
 		self.sb = sb #self.sb is now the parent soundblizzard instance
 		self.sb.player.connect("eos", self.get_next)
 	def load_playlist(self, filename):
-		self.playlist = [0]
+		self.playlist = [0,1,2,3,4,5]
 		self.position = -1
 		self.history = []
 		self.get_next()
