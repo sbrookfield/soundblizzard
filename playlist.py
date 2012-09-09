@@ -26,6 +26,7 @@ class playlist(GObject.GObject):
 		self.sb = soundblizzard.soundblizzard # fakes for tab completion - assigns it to the class
 		self.sb = sb #self.sb is now the parent soundblizzard instance
 		self.sb.player.connect("eos", self.get_next)
+	def __setattr__(self,):
 	def load_playlist(self, filename):
 		self.playlist = [0,1,2,3,4,5]
 		self.position = -1

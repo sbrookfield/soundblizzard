@@ -187,7 +187,39 @@ class mpdserver(object):
 		return output
 	def stats(self, arg):
 		return 'artists: %i\nalbums: %i\nsongs: %i\nuptime: %i\nplaytime: %i\ndb_playtime: %i\ndb_update: %i\nOK\n' % (1,1,1,1,1,1,1) #TODO: stats
-
+#Playback options
+	def consume(self, arg):
+		return self.setplaystate('consume', arg)
+	def setplaystate(self, name, arg):
+		#manufactured function which toggles state of self.sb.playlist.name to value of
+		if arg == '0':
+			output = 'OK\n'			
+			setattr(self.sb.playlist, name, 0)
+		elif arg == '1':
+			output = 'OK\n'
+			setattr(self.sb.playlist, name, 1)
+		else:
+			output = 'ACK [2@0] {{{0}}} usage {0} 0 or {0} 1\n'.format(name)
+		return output
+	def crossfade(self, arg):
+		return 'OK/n'
+	def mixrampdb(self, arg):
+		return 'OK/n'
+	def mixrampdelay(self, arg):
+		return 'OK/n'	
+	def random(self, arg):
+		return self.setplaystate('random', arg)
+	def repeat(self, arg):
+		return self.setplaystate('repeat', arg)
+	def setvol(self, arg):
+		self.sb.player.setvol(int(arg))
+		return 'OK\n'
+	def single(self, arg):
+		return self.setplaystate('single', arg)
+	def replay_gain_mode(self, arg):
+		return 'OK/n'
+	def replay_gain_status(self, arg):
+		return 'OK/n'
 	
 	def play(self, arg):
 		return 'OK\n'	
@@ -229,16 +261,7 @@ class mpdserver(object):
 			output = 'OK\n'
 
 		#Playback Options
-		elif command == 'consume':
-			print 'Recognised consume command'
-			if args == '0':
-				output = 'OK\n'
-				self.sb.playlist.consume = 0
-			elif args == '1':
-				output = 'OK\n'
-				self.sb.playlist.consume = 1
-			else:
-				output = 'ACK [2@0] {consume} usage consume 0 or consume 1\n'
+
 		elif command == 'crossfade':
 			output = 'OK\n'
 		elif command == 'mixrampdb':
