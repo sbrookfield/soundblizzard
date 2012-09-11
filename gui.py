@@ -133,44 +133,53 @@ class GTKGui(object):
 		self.widgets['info_labels'].append(widget)
 	def is_single_toggle(self, widget):
 		self.widgets['single_toggles'].append(widget)
-		self.single_toggle_update()
+		self.single_toggle_update(self.sb.playlist.single, self.sb.playlist.single.get(), widget)
 		widget.connect('toggled', self.on_single_toggle)
+		self.sb.playlist.single.connect('changed', self.single_toggle_update, widget)
 	def on_single_toggle(self, widget):
-		if self.sb.playlist.single != widget.get_active():
-			self.sb.playlist.single = widget.get_active()
+		if self.sb.playlist.single.get() != widget.get_active():
+			self.sb.playlist.single.set(widget.get_active())
 		loggy.log ('toggle button ' + str(widget.get_active()))
-	def single_toggle_update(self):
-		pass #TODO get single toggle to change when it is changed elsewhere
+	#TODO: combine this into one function not four
+	def single_toggle_update(self, toggle, value, widget):
+		if widget.get_active() != value:
+			widget.set_active(value) 
 	def is_consume_toggle(self, widget):
 		self.widgets['consume_toggles'].append(widget)
-		self.consume_toggle_update()
+		self.consume_toggle_update(self.sb.playlist.consume, self.sb.playlist.consume.get(), widget)
 		widget.connect('toggled', self.on_consume_toggle)
+		self.sb.playlist.consume.connect('changed', self.consume_toggle_update, widget)
 	def on_consume_toggle(self, widget):
-		if self.sb.playlist.consume != widget.get_active():
-			self.sb.playlist.consume = widget.get_active()
+		if self.sb.playlist.consume.get != widget.get_active():
+			self.sb.playlist.consume.set(widget.get_active())
 		loggy.log ('toggle button ' + str(widget.get_active()))
-	def consume_toggle_update(self):
-		None #TODO get consume toggle to change when it is changed elsewhere
+	def consume_toggle_update(self, toggle, value, widget):
+		if widget.get_active() != value:
+			widget.set_active(value) 
 	def is_repeat_toggle(self, widget):
 		self.widgets['repeat_toggles'].append(widget)
-		self.repeat_toggle_update()
+		self.repeat_toggle_update(self.sb.playlist.repeat, self.sb.playlist.repeat.get(), widget)
 		widget.connect('toggled', self.on_repeat_toggle)
+		self.sb.playlist.repeat.connect('changed', self.repeat_toggle_update, widget)
 	def on_repeat_toggle(self, widget):
-		if self.sb.playlist.repeat != widget.get_active():
-			self.sb.playlist.repeat = widget.get_active()
+		if self.sb.playlist.repeat.get() != widget.get_active():
+			self.sb.playlist.repeat.set(widget.get_active())
 		loggy.log ('toggle button ' + str(widget.get_active()))
-	def repeat_toggle_update(self):
-		None #TODO get repeat toggle to change when it is changed elsewhere
+	def repeat_toggle_update(self, toggle, value, widget):
+		if widget.get_active() != value:
+			widget.set_active(value) 
 	def is_random_toggle(self, widget):
 		self.widgets['random_toggles'].append(widget)
-		self.random_toggle_update()
+		self.random_toggle_update(self.sb.playlist.random, self.sb.playlist.random.get(), widget)
 		widget.connect('toggled', self.on_random_toggle)
+		self.sb.playlist.random.connect('changed', self.random_toggle_update, widget)
 	def on_random_toggle(self, widget):
-		if self.sb.playlist.random != widget.get_active():
-			self.sb.playlist.random = widget.get_active()
+		if self.sb.playlist.random.get() != widget.get_active():
+			self.sb.playlist.random.set(widget.get_active())
 		loggy.log ('toggle button ' + str(widget.get_active()))
-	def random_toggle_update(self):
-		None #TODO get random toggle to change when it is changed elsewhere
+	def random_toggle_update(self, toggle, value, widget):
+		if widget.get_active() != value:
+			widget.set_active(value) 
 	def on_async_done(self, player):
 		loggy.debug('gui.on_async_done')
 		self.on_update_tags()

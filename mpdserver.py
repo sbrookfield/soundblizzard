@@ -167,10 +167,10 @@ class mpdserver(object):
 		return 'changed: database update stored_playlist playlist player mixer output options sticker subscription message\nOK\n'#TODO: handle properly
 	def status(self, arg):
 		output = 'volume: %i\n' % (self.sb.player.vol) #TODO: get rid of % and +=
-		output += 'repeat: %i\n' % (int(self.sb.playlist.repeat))
-		output += 'random: %i\n' % (int(self.sb.playlist.random))
-		output += 'single: %i\n' % (int(self.sb.playlist.single))
-		output += 'consume: %i\n' % (int(self.sb.playlist.consume))
+		output += 'repeat: %i\n' % (int(self.sb.playlist.repeat.get()))
+		output += 'random: %i\n' % (int(self.sb.playlist.random.get()))
+		output += 'single: %i\n' % (int(self.sb.playlist.single.get()))
+		output += 'consume: %i\n' % (int(self.sb.playlist.consume.get()))
 		output += 'playlist: %i\n' % (1)
 		output += 'playlistlength: %i\n' % (2)
 		output += 'xfade: %i\n' % (0)
@@ -189,18 +189,8 @@ class mpdserver(object):
 		return 'artists: %i\nalbums: %i\nsongs: %i\nuptime: %i\nplaytime: %i\ndb_playtime: %i\ndb_update: %i\nOK\n' % (1,1,1,1,1,1,1) #TODO: stats
 #Playback options
 	def consume(self, arg):
-		return self.setplaystate('consume', arg)
-	def setplaystate(self, name, arg):
-		#manufactured function which toggles state of self.sb.playlist.name to value of
-		if arg == '0':
-			output = 'OK\n'			
-			setattr(self.sb.playlist, name, 0)
-		elif arg == '1':
-			output = 'OK\n'
-			setattr(self.sb.playlist, name, 1)
-		else:
-			output = 'ACK [2@0] {{{0}}} usage {0} 0 or {0} 1\n'.format(name)
-		return output
+		self.sb.playlist.consume.set(int(arg))
+		return 'OK\n'
 	def crossfade(self, arg):
 		return 'OK/n'
 	def mixrampdb(self, arg):
@@ -208,14 +198,17 @@ class mpdserver(object):
 	def mixrampdelay(self, arg):
 		return 'OK/n'	
 	def random(self, arg):
-		return self.setplaystate('random', arg)
+		self.sb.playlist.random.set(int(arg))
+		return 'OK\n'
 	def repeat(self, arg):
-		return self.setplaystate('repeat', arg)
+		self.sb.playlist.repeat.set(int(arg))
+		return 'OK\n'
 	def setvol(self, arg):
 		self.sb.player.setvol(int(arg))
 		return 'OK\n'
 	def single(self, arg):
-		return self.setplaystate('single', arg)
+		self.sb.playlist.single.set(int(arg))
+		return 'OK\n'
 	def replay_gain_mode(self, arg):
 		return 'OK/n'
 	def replay_gain_status(self, arg):
