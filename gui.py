@@ -5,7 +5,7 @@ import player, loggy, gst, cairo
 from gi.repository import Gtk
 from gi.repository import GdkX11
 from gi.repository import GObject
-
+#TODO: look at kiwi for pygtk lists etc.
 #pyGtk.require("2.0")
 #except:
 #	print "gui - Required libraries not found - pyGtk, Gtk, player, loggy, gst, sbdb! Please install\n"

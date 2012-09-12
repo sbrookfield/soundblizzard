@@ -66,6 +66,7 @@ class playlist():
 		except TypeError:
 			loggy.warn('could not get next playlist item, skipping')
 			self.get_next()
+		#TODO: move to right position if in playlist
 	def get_prev(self):
 		self.position -= 1
 		if (self.position<0):

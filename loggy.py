@@ -8,6 +8,7 @@ except:
 	Spambox Log Functions
 	'''
 #TODO: make log color green warn orange, die red
+#TODO: see python logging module
 #TODO: count calls of each log / function call
 #Have a null version of loggy for speed
 errors=[]

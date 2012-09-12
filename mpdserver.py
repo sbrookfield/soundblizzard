@@ -8,6 +8,7 @@ Created on 20 Mar 2011
 #TODO: out = "<html>%(head)s%(prologue)s%(query)s%(tail)s</html>" % locals() change all var substitutions to this, it's faster, see http://wiki.python.org/moin/PythonSpeed/PerformanceTips
 import socket, loggy, soundblizzard, config
 from gi.repository import GObject
+from cupshelpers.cupshelpers import arg
 #except:
 #    loggy.warn('Could not find required libraries: socket GObject loggy player')
 
@@ -213,9 +214,56 @@ class mpdserver(object):
 		return 'OK/n'
 	def replay_gain_status(self, arg):
 		return 'OK/n'
-	
+#Controlling playback
+	def next(self, arg):
+		self.sb.playlist.get_next()
+		return 'OK/n'
+	def pause(self, arg):
+		if len(arg)>0:
+			if int(arg):
+				self.sb.player.play()
+			else:
+				self.sb.player.pause()
+		else:
+			self.sb.player.playpause()
+		return 'OK/n'
 	def play(self, arg):
-		return 'OK\n'	
+		if len(arg)>0:
+			self.sb.playlist.load_pos(int(arg))
+		else:
+			self.sb.player.play()
+			return 'OK/n'
+	def playid(self, arg):
+		self.sb.playlist.load_id(int(arg))
+		return 'OK/n'
+	def previous(self, arg):
+		self.sb.playlist.get_prev()
+		return'OK/n'
+	def seek(self, arg):
+		arg = arg.split()
+		if len(arg)>0:
+			self.sb.playlist.load_pos(int(arg[0]))
+			self.sb.player.setpos(int(arg[1])*self.sb.player.SECOND)
+		else:
+			self.sb.player.setpos(int(arg[0])*self.sb.player.SECOND)
+		return 'OK/n'
+	def seekid(self, arg):
+		arg = arg.split()
+		if len(arg)>0:
+			self.sb.playlist.load_id(int(arg[0]))
+			self.sb.player.setpos(int(arg[1])*self.sb.player.SECOND)
+		else:
+			self.sb.player.setpos(int(arg[0])*self.sb.player.SECOND)
+		return 'OK/n'
+	def seekcur(self, arg):
+		if len(arg)>0:
+			self.sb.player.setpos(int(arg)*self.sb.player.SECOND)
+		return 'OK/n'
+	def stop(self, arg):
+		self.sb.player.stop()
+		return 'OK/n'
+#Current Playlist
+			
 	def test(self, arg):
 		command = ''
 		args = ''
