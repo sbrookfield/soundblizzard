@@ -1,8 +1,11 @@
 #!/usr/bin/python
+# -*- coding: latin-1 -*-
 '''
 Created on 20 Mar 2011
 
 @author: sam
+
+Big thanks to the excellent documentation of MPD at http://www.musicpd.org/doc/protocol/index.html
 '''
 #try:
 #TODO: out = "<html>%(head)s%(prologue)s%(query)s%(tail)s</html>" % locals() change all var substitutions to this, it's faster, see http://wiki.python.org/moin/PythonSpeed/PerformanceTips
@@ -95,12 +98,14 @@ class mpdserver(object):
 							self.queueing = False
 							self.ok_queueing = False
 				#Handles output - with respect to list queueing
-				if output.startswith('ACK'):
+				if not output:
+					output = 'ACK 1@1 {{{0}}} Command returned no output - not implemented yet\n'.format(command)
+				elif output.startswith('ACK'):
 					self.queueing = False
 					self.ok_queueing = False
 					output = self.queue + output
 					self.queue = ''
-				elif self.ok_queueing:
+				if self.ok_queueing:
 					#if output[-3:-1] == 'OK':
 						#output = output[:-3] + 'list_OK\n'
 					output = output.replace("OK", "list_OK")
@@ -375,6 +380,141 @@ Id: {values[songid]}\n'''
 		return 'OK\n'
 	def swapid(self, arg):
 		return 'OK\n'
+	def	listplaylist(self, arg):
+		''' listplaylist {NAME} Lists the songs in the playlist. Playlist plugins are supported.'''
+		pass
+	def listplaylistinfo(self, arg):
+		'''listplaylistinfo {NAME} Lists the songs with metadata in the playlist. Playlist plugins are supported.'''
+		pass
+	def listplaylists(self,arg):
+		'''listplaylists Prints a list of the playlist directory. After each playlist name the server sends its last modification time as attribute "Last-Modified" in ISO 8601 format. To avoid problems due to clock differences between clients and the server, clients should not compare this value with their local clock.'''
+		pass
+	def load(self, arg):
+		'''load {NAME} [START:END]Loads the playlist into the current queue. Playlist plugins are supported. A range may be specified to load only a part of the playlist.'''
+		pass
+	def playlistadd(self, arg):
+		'''playlistadd {NAME} {URI} Adds URI to the playlist NAME.m3u. NAME.m3u will be created if it does not exist.'''
+		pass
+	def playlistclear(self,arg):
+		'''playlistclear {NAME} Clears the playlist NAME.m3u.'''
+		pass
+	def playlistdelete(self, arg):
+		'''playlistdelete {NAME} {SONGPOS} Deletes SONGPOS from the playlist NAME.m3u.'''
+		pass
+	def playlistmove (self, arg):
+		'''playlistmove {NAME} {SONGID} {SONGPOS} Moves SONGID in the playlist NAME.m3u to the position SONGPOS.'''
+		pass
+	def rename(self, arg):
+		'''rename {NAME} {NEW_NAME} Renames the playlist NAME.m3u to NEW_NAME.m3u.'''
+		pass
+	def rm(self, arg):
+		'''rm {NAME} Removes the playlist NAME.m3u from the playlist directory.'''
+		pass
+	def save(self, arg):
+		'''save {NAME} Saves the current playlist to NAME.m3u in the playlist directory.'''
+		pass
+	def count(self, arg):
+		'''count {TAG} {NEEDLE} Counts the number of songs and their total playtime in the db matching TAG exactly.'''
+		pass
+	def find(self, arg):
+		'''find {TYPE} {WHAT} [...] Finds songs in the db that are exactly WHAT. TYPE can be any tag supported by MPD, or one of the two special parameters — file to search by full path (relative to database root), and any to match against all available tags. WHAT is what to find.'''
+		pass
+	def findadd(self, arg):
+		'''findadd {TYPE} {WHAT} [...] Finds songs in the db that are exactly WHAT and adds them to current playlist. Parameters have the same meaning as for find.'''
+		pass
+	def list(self, arg):
+		'''list {TYPE} [ARTIST] Lists all tags of the specified type. TYPE can be any tag supported by MPD or file. ARTIST is an optional parameter when type is album, this specifies to list albums by an artist.'''
+		pass
+	def listall(self, arg):
+		'''listall [URI] Lists all songs and directories in URI.'''
+		pass
+	def listallinfo(self, arg):
+		'''listallinfo [URI] Same as listall, except it also returns metadata info in the same format as lsinfo.'''
+		pass
+	def lsinfo(self, arg):
+		'''lsinfo [URI] Lists the contents of the directory URI. When listing the root directory, this currently returns the list of stored playlists. This behavior is deprecated; use "listplaylists" instead. Clients that are connected via UNIX domain socket may use this command to read the tags of an arbitrary local file (URI beginning with "file:///").'''
+		pass
+	def search(self, arg):
+		'''search {TYPE} {WHAT} [...] Searches for any song that contains WHAT. Parameters have the same meaning as for find, except that search is not case sensitive.'''
+		pass
+	def searchadd(self, arg):
+		'''searchadd {TYPE} {WHAT} [...] Searches for any song that contains WHAT in tag TYPE and adds them to current playlist. Parameters have the same meaning as for find, except that search is not case sensitive.'''
+		pass
+	def searchaddpl(self, arg):
+		'''searchaddpl {NAME} {TYPE} {WHAT} [...] Searches for any song that contains WHAT in tag TYPE and adds them to the playlist named NAME. If a playlist by that name doesn't exist it is created. Parameters have the same meaning as for find, except that search is not case sensitive.'''
+		pass
+	def update(self, arg):
+		'''update [URI] Updates the music database: find new files, remove deleted files, update modified files. URI is a particular directory or song/file to update. If you do not specify it, everything is updated. Prints "updating_db: JOBID" where JOBID is a positive number identifying the update job. You can read the current job id in the status response.'''
+		pass
+	def rescan(self, arg):
+		'''rescan [URI] Same as update, but also rescans unmodified files.'''
+		pass
+#stickers not yet implemented
+	def close(self, arg):
+		'''close Closes the connection to MPD.'''
+		pass
+	def kill(self, arg):
+		'''kill Kills MPD.'''
+		pass
+	def password(self, arg):
+		'''password {PASSWORD} This is used for authentication with the server. PASSWORD is simply the plaintext password.'''
+		pass
+	def ping(self, arg):
+		'''ping Does nothing but return "OK".'''
+		return 'OK\n'	
+# OUTPUTS
+	def disableoutput(self, arg):
+		'''disableoutput {ID} Turns an output off.'''
+		pass
+	def enableoutput(self, arg):
+		'''enableoutput {ID} Turns an output on.'''
+		pass
+	def outputs(self, arg):
+		'''outputs Shows information about all outputs.'''
+		pass
+
+#Reflection
+	def config(self, arg):
+		'''config Dumps configuration values that may be interesting for the client. This command is only permitted to "local" clients (connected via UNIX domain socket).'''
+		pass
+	def commands(self, arg):
+		'''commands Shows which commands the current user has access to.'''
+		pass
+	def notcommands(self, arg):
+		'''notcommands Shows which commands the current user does not have access to.'''
+		pass
+	def tagtypes(self, arg):
+		'''tagtypes Shows a list of available song metadata.'''
+		pass
+	def urlhandlers(self, arg):
+		'''urlhandlers Gets a list of available URL handlers.'''
+		pass
+	def decoders(self, arg):
+		'''decoders Print a list of decoder plugins, followed by their supported suffixes and MIME types. Example response: 
+			plugin: mad
+			suffix: mp3
+			suffix: mp2
+			mime_type: audio/mpeg
+			plugin: mpcdec
+			suffix: mpc'''
+		pass
+
+# CLIENT TO CLIENT
+	def subscribe(self, arg):
+		'''subscribe {NAME} Subscribe to a channel. The channel is created if it does not exist already. The name may consist of alphanumeric ASCII characters plus underscore, dash, dot and colon.'''
+		pass
+	def unsubscribe(self, arg):
+		'''unsubscribe {NAME} Unsubscribe from a channel.'''
+		pass
+	def channels(self, arg):
+		'''channels Obtain a list of all channels. The response is a list of "channel:" lines.'''
+		pass
+	def readmessages(self, arg):
+		'''readmessages Reads messages for this client. The response is a list of "channel:" and "message:" lines.'''
+		pass
+	def sendmessage(self, arg):
+		'''sendmessage {CHANNEL} {TEXT} Send a message to the specified channel.'''
+		pass	
 	
 	
 	

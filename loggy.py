@@ -19,9 +19,9 @@ def log(message):
 def warn(message):
 	message = '\033[31m' + time.strftime('%x %X') + '- ' + message.replace('|', '\n') + '\033[0m' 
 	print message
-	errors.append(message)#TODO: test and fix log of warnings
-	if len(errors)>50:
-		warn('Maximum errors exceeded')
+#	errors.append(message)#TODO: test and fix log of warnings
+#	if len(errors)>50:
+#		warn('Maximum errors exceeded') # TAIL RECURSION
 def die(message):
 	print '\033[91m' + time.strftime('%x %X') + '- ' + message.replace('|', '\n')+ '\033[0m'
 	quit()
