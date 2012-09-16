@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: latin-1 -*-
 '''
 Created on 20 Mar 2011
 
@@ -12,6 +11,7 @@ Big thanks to the excellent documentation of MPD at http://www.musicpd.org/doc/p
 import socket, loggy, soundblizzard, re, config
 from gi.repository import GObject
 import traceback #TODO: put this in loggy
+import shlex
 #except:
 #    loggy.warn('Could not find required libraries: socket GObject loggy player')
 #TODO: use is not ==
@@ -22,6 +22,7 @@ class mpdserver(object):
 	Settings - self.port = tcp_port
 	self.host = tcp_host
 	'''
+	internal_commands = ('__class__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'handler', 'host', 'trackdetails', 'listener', 'sb', 'startserver', 'sock', 'queue', 'queueing', 'port', 'ok_queueing', 'conn', 'internal_commands')
 	def __init__(self, sb):
 		self.sb = soundblizzard.soundblizzard
 		self.sb = sb
@@ -51,11 +52,11 @@ class mpdserver(object):
 		return True
 	def handler(self, conn, *args):
 		'''Asynchronous connection handler. Processes each line from the socket.'''
-		buff = conn.recv(4096) #TODO: handle if more on conn to recieve than 4096
+		buff = conn.recv(65536) #TODO: handle if more on conn to recieve than 4096
 		if not len(buff):
 			loggy.log( "mpdserver Connection closed - no input." )
 			return False
-		elif len(buff)>4000:
+		elif len(buff)>60000:
 			loggy.warn('mpdserver Connection buff full, data may be lost' . buff)
 		#loggy.log('MPD Server got:' +buff)
 		while '\n' in buff:
@@ -77,7 +78,7 @@ class mpdserver(object):
 				func = None
 				loggy.debug('mpdserver got {0} {1}'.format(command, args))
 				# Makes sure command is not internal function
-				if command in ('startsever', 'trackdetails', 'handler', 'listner'):
+				if command in self.internal_commands:
 					loggy.warn('mpdserver attempt to access internals {0}'.format(command))
 				else:
 					#Searches for command in current class
@@ -100,6 +101,7 @@ class mpdserver(object):
 				#Handles output - with respect to list queueing
 				if not output:
 					output = 'ACK 1@1 {{{0}}} Command returned no output - not implemented yet\n'.format(command)
+					loggy.warn('mpdserver: {0}'.format(output))
 				elif output.startswith('ACK'):
 					self.queueing = False
 					self.ok_queueing = False
@@ -126,7 +128,7 @@ class mpdserver(object):
 			values = self.sb.sbdb.get_id_db_info(item)
 			if not values:
 				values = self.sb.sbdb.blanktags
-			print values
+			#print values
 			#output = "%sfile: %s\nLast-Modified: %s\nTime: %s\nArtist: %s\nAlbumArtist: %s\nTitle: %s\nAlbum: %s Track: %s/%s\nDate: %s\nPos: %s\nId: %s\n" % \
 			#(output, values['uri'], values['mtime'], values['duration'], values['artist'], values['album-artist'], values['title'], values['album'], \
 			#values['track-number'], values['track-count'], values['date'],index, values['songid'])
@@ -177,6 +179,8 @@ Id: {values[songid]}\n'''
 			return output
 	def idle(self, arg):
 		return 'changed: database update stored_playlist playlist player mixer output options sticker subscription message\nOK\n'#TODO: handle properly
+	def noidle(self,arg):
+		pass
 	def status(self, arg):
 		output = 'volume: %i\n' % (self.sb.player.vol) #TODO: get rid of % and +=
 		output += 'repeat: %i\n' % (int(self.sb.playlist.repeat.get()))
@@ -349,6 +353,8 @@ Id: {values[songid]}\n'''
 	def playlistfind(self, arg):
 		return 'OK\n' #TODO: implement mpdserver.playlistfind
 	def playlistid(self, arg):
+		'''playlistid {SONGID} Displays a list of songs in the playlist. SONGID is optional and specifies a single song to display info for.'''
+		arg = arg.strip('\'\" ')
 		if len(arg)>0:
 			output = self.trackdetails([int(arg)])
 		else:
@@ -356,13 +362,17 @@ Id: {values[songid]}\n'''
 		output += 'OK\n'
 		return output
 	def playlistinfo(self, arg):
+		'''playlistinfo [[SONGPOS] | [START:END]] Displays a list of all songs in the playlist, or if the optional argument is given, displays information only for the song SONGPOS or the range of songs START:END'''
 		temp = arg.split(':')
 		if len(temp)>1:
-			start = temp[0]
-			end = temp[1]
+			start = temp[0].strip('\'\" ')
+			end = temp[1].strip('\'\" ')
+		elif len(temp)>0:
+			start = temp[0].strip('\'\" ')
+			end = start+1
 		else:
-			start = temp[0]
-			end = start
+			start = 0
+			end = len(temp)
 		output = self.trackdetails(self.sb.playlist.playlist[start:end])
 		output.append('OK\n')
 		return ''.join(output)
@@ -380,6 +390,8 @@ Id: {values[songid]}\n'''
 		return 'OK\n'
 	def swapid(self, arg):
 		return 'OK\n'
+	def shuffle(self,arg):
+		pass
 	def	listplaylist(self, arg):
 		''' listplaylist {NAME} Lists the songs in the playlist. Playlist plugins are supported.'''
 		pass
@@ -417,13 +429,15 @@ Id: {values[songid]}\n'''
 		'''count {TAG} {NEEDLE} Counts the number of songs and their total playtime in the db matching TAG exactly.'''
 		pass
 	def find(self, arg):
-		'''find {TYPE} {WHAT} [...] Finds songs in the db that are exactly WHAT. TYPE can be any tag supported by MPD, or one of the two special parameters — file to search by full path (relative to database root), and any to match against all available tags. WHAT is what to find.'''
+		'''find {TYPE} {WHAT} [...] Finds songs in the db that are exactly WHAT. TYPE can be any tag supported by MPD, or one of the two special parameters  file to search by full path (relative to database root), and any to match against all available tags. WHAT is what to find.'''
 		pass
 	def findadd(self, arg):
 		'''findadd {TYPE} {WHAT} [...] Finds songs in the db that are exactly WHAT and adds them to current playlist. Parameters have the same meaning as for find.'''
 		pass
 	def list(self, arg):
 		'''list {TYPE} [ARTIST] Lists all tags of the specified type. TYPE can be any tag supported by MPD or file. ARTIST is an optional parameter when type is album, this specifies to list albums by an artist.'''
+		args = shlex.split(arg)
+		#if len()
 		pass
 	def listall(self, arg):
 		'''listall [URI] Lists all songs and directories in URI.'''
@@ -471,24 +485,30 @@ Id: {values[songid]}\n'''
 		pass
 	def outputs(self, arg):
 		'''outputs Shows information about all outputs.'''
-		pass
-
+		return '''outputid: 0\noutputname: My Pulse Output\noutputenabled: 1\nOK\n'''
 #Reflection
 	def config(self, arg):
 		'''config Dumps configuration values that may be interesting for the client. This command is only permitted to "local" clients (connected via UNIX domain socket).'''
 		pass
 	def commands(self, arg):
+		output = ''
+		for i in dir(self):
+			if i in self.internal_commands:
+				continue
+			else:
+				output = '{output}command: {command}\n'.format(output=output, command=i)
+		output += 'OK\n'
 		'''commands Shows which commands the current user has access to.'''
-		pass
+		return output
 	def notcommands(self, arg):
 		'''notcommands Shows which commands the current user does not have access to.'''
-		pass
+		return 'OK\n'
 	def tagtypes(self, arg):
 		'''tagtypes Shows a list of available song metadata.'''
 		pass
 	def urlhandlers(self, arg):
 		'''urlhandlers Gets a list of available URL handlers.'''
-		pass
+		return '''handler: http://\nhandler: mms://\nhandler: mmsh://\nhandler: mmst://\nhandler: mmsu://\nhandler: gopher://\nhandler: rtp://\nhandler: rtsp://\nhandler: rtmp://\nhandler: rtmpt://\nhandler: rtmps://\nOK\n'''
 	def decoders(self, arg):
 		'''decoders Print a list of decoder plugins, followed by their supported suffixes and MIME types. Example response: 
 			plugin: mad

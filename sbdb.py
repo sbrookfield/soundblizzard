@@ -115,7 +115,6 @@ class sbdb(GObject.GObject):
 #	def get_types(self):
 #		self.curs.execute('select * from media')
 #		temp = self.curs.fetchone()
-#		print temp
 	def get_uri_db_info(self, uri):
 		self.sqlexec('select * from "media" where "uri"="' + str(uri) + '" ')
 		return self.curs.fetchone()
@@ -140,11 +139,9 @@ class sbdb(GObject.GObject):
 			for path, dirs, files in os.walk(folder):
 				for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files ]:
 					row = self.get_uri_db_info('file://'+filename)
-					print 'file://'+filename
 					if row:
-						print 'found'+filename
 						(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(filename)
-						print ' old {0}, new {1} mtimes'.format(row['mtime'], mtime)
+						#print ' old {0}, new {1} mtimes'.format(row['mtime'], mtime)
 						if mtime <= row['mtime']:
 							continue
 					mime = mimetypes.guess_type(filename)[0] #TODO: get rid of mimetype
