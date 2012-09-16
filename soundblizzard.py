@@ -7,6 +7,8 @@ mainloop = GObject.MainLoop()
 class soundblizzard():
 
 	def __init__(self):
+		import loggy
+		loggy.debug_setting = True
 		import config
 		self.config = config.config(self)
 		import sbdb
@@ -24,17 +26,16 @@ class soundblizzard():
 		self.mpdserver = mpdserver.mpdserver(self)
 		#self.mpdserver.startserver('192.168.0.4', 6601)
 
-		import loggy
-		loggy.debug_setting = True
+
 		#import dbus_mpris
 		#self.dbus_mpris = dbus_mpris.dbus_mpris(self)
-		import gui
-		self.gtkgui = gui.GTKGui(self)
+		#import gui
+		#self.gtkgui = gui.GTKGui(self)
 		
 
 if __name__ == "__main__":
 	sb = soundblizzard()
-	sb.playlist.load_playlist('ben')
+	sb.playlist.load_playlist([0,1,2,3,4,5])
 	sb.playlist.get_next()
 	sb.player.pause()
 

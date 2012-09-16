@@ -77,7 +77,7 @@ class player(GObject.GObject):
 	def reset(self):
 		self.player.set_state(gst.STATE_NULL)
 		#for tag in self.
-		self.tags = self.soundblizzard.sbdb.blanktags
+		self.tags = self.soundblizzard.sbdb.blanktags.copy()
 	def on_message(self, bus, message):
 		if message.type == gst.MESSAGE_EOS: #TODO: reorder for speed , or take signals out individually...
 			self.emit('eos')#called when end of stream reached

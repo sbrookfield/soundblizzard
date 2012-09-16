@@ -13,7 +13,7 @@ class tagger(object):
 	'''
 	Tagger - opens gstreamer pipeline, gets tags and duration
 	''' #TODO: Meta mux stream? Tidy all starts to files!, comments
-	def init(self):  #wait till load_file?
+	def __init__(self):  #wait till load_file?
 		self.player = gst.parse_launch('uridecodebin name=source ! fakesink')
 		self.source = self.player.get_by_name("source")
 		self.bus = self.player.get_bus()
@@ -26,7 +26,7 @@ class tagger(object):
 		self.reset()
 		self.uri = uri
 		self.callback = callback
-		loggy.log( "Player loading " + uri)
+		loggy.log( "Tagger loading " + uri)
 		self.source.set_property("uri", uri)
 		self.player.set_state(gst.STATE_PAUSED)
 

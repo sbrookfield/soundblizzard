@@ -386,6 +386,5 @@ if __name__ == "__main__":
 	#sbdb1 = sbdb.sbdb()
 	loggy.debug_setting = True
 	app = GTKGui(temp)
-	#player1.load_playlist('ben')
 	Gtk.main()
 

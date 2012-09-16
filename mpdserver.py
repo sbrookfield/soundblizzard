@@ -6,11 +6,12 @@ Created on 20 Mar 2011
 '''
 #try:
 #TODO: out = "<html>%(head)s%(prologue)s%(query)s%(tail)s</html>" % locals() change all var substitutions to this, it's faster, see http://wiki.python.org/moin/PythonSpeed/PerformanceTips
-import socket, loggy, soundblizzard, config
+import socket, loggy, soundblizzard, re, config
 from gi.repository import GObject
-from cupshelpers.cupshelpers import arg
+import traceback #TODO: put this in loggy
 #except:
 #    loggy.warn('Could not find required libraries: socket GObject loggy player')
+#TODO: use is not ==
 
 class mpdserver(object):
 	'''
@@ -61,11 +62,11 @@ class mpdserver(object):
 				loggy.log( "mpdserver Connection closed - no input." )
 				return False
 			else:
-				arg = line.rstrip().lstrip().split(' ', 1) #strips whitespace from right and left, then splits first word off as command
+				arg = line.strip().split(' ', 1) #strips whitespace from right and left, then splits first word off as command
 				command = arg[0].lower() # prevents case sensitivity
 				#TODO: reimplement using a dict?
 				if (len(arg)>1): # if there are arguments to the command
-					args = arg[1].lstrip().rstrip()
+					args = arg[1].strip()
 				else:
 					args = ''
 				#Tries to recognise command
@@ -80,7 +81,7 @@ class mpdserver(object):
 					try:
 						func = getattr(self, command)
 					except Exception as detail:
-						output = 'ACK 50@1 {{{0}}} COMMAND NOT RECOGNISED {1} {2}\n'.format (command, detail, str(type(detail)))
+						output = 'ACK 50@1 {{{0}}} Command not recognised\n'.format (command)
 						loggy.warn('mpdserver: {0}'.format(output))
 						self.queueing = False
 						self.ok_queueing = False
@@ -89,7 +90,7 @@ class mpdserver(object):
 						try:
 							output = func(args)
 						except Exception as detail:
-							output = 'ACK 50@1 {{{0}}} {1} {2}\n'.format (command, detail, str(type(detail))) 
+							output = 'ACK 50@1 {{{0}}} {1} {2} {3}\n'.format(command, detail, str(type(detail)), traceback.format_exc().replace('\n', '|')) 
 							loggy.warn('mpdserver: {0}'.format(output))
 							self.queueing = False
 							self.ok_queueing = False
@@ -115,24 +116,29 @@ class mpdserver(object):
 		return True
 				#TODO: reflection, stickers, client to client
 	def trackdetails (self, pl):
-		output = ""
-		for i in range (0, len(pl)):
-			uri = pl[i]
-			values = self.sb.sbdb.get_uri_db_info(uri)
-			print str(values)+"\n"
-			
-			print type(values)
-			if (values == None):
-				output = 'ACK\n'
-				return output
-			output += "file: %s\nLast-Modified: %s\nTime: %s\nArtist: %s\nAlbumArtist: %s\nTitle: %s\nAlbum: %s Track: %s/%s\nDate: %s\nPos: %s\nId: %s\n" % \
-			(values['uri'], values['mtime'], values['duration'], values['artist'], values['album-artist'], values['title'], values['album'], \
-			values['track-number'], values['track-count'], values['date'],i,0)
-		print output
+		output = ''
+		for index, item in enumerate(pl):
+			values = self.sb.sbdb.get_id_db_info(item)
+			if not values:
+				values = self.sb.sbdb.blanktags
+			print values
+			#output = "%sfile: %s\nLast-Modified: %s\nTime: %s\nArtist: %s\nAlbumArtist: %s\nTitle: %s\nAlbum: %s Track: %s/%s\nDate: %s\nPos: %s\nId: %s\n" % \
+			#(output, values['uri'], values['mtime'], values['duration'], values['artist'], values['album-artist'], values['title'], values['album'], \
+			#values['track-number'], values['track-count'], values['date'],index, values['songid'])
+			songinfo ='''{output}file: {values[uri]}
+Last-Modified: {values[mtime]}
+Time: {values[duration]}
+Artist: {values[artist]}
+AlbumArtist: {values[album-artist]}
+Title: {values[title]}
+Album: {values[album]}
+Track: {values[track-number]}/{values[track-count]}
+Date: {values[date]}
+Pos: {index}
+Id: {values[songid]}\n'''
+			output = songinfo.format(output=output, values=values, index=index)		
 		return output
-		#TODO: tidy	this function					
-						
-								
+
 #Command list functions
 	def command_list_begin(self, arg):
 		self.queueing = True
@@ -193,11 +199,11 @@ class mpdserver(object):
 		self.sb.playlist.consume.set(int(arg))
 		return 'OK\n'
 	def crossfade(self, arg):
-		return 'OK/n'
+		return 'OK\n'
 	def mixrampdb(self, arg):
-		return 'OK/n'
+		return 'OK\n'
 	def mixrampdelay(self, arg):
-		return 'OK/n'	
+		return 'OK\n'	
 	def random(self, arg):
 		self.sb.playlist.random.set(int(arg))
 		return 'OK\n'
@@ -211,13 +217,13 @@ class mpdserver(object):
 		self.sb.playlist.single.set(int(arg))
 		return 'OK\n'
 	def replay_gain_mode(self, arg):
-		return 'OK/n'
+		return 'OK\n'
 	def replay_gain_status(self, arg):
-		return 'OK/n'
+		return 'OK\n'
 #Controlling playback
 	def next(self, arg):
 		self.sb.playlist.get_next()
-		return 'OK/n'
+		return 'OK\n'
 	def pause(self, arg):
 		if len(arg)>0:
 			if int(arg):
@@ -226,224 +232,162 @@ class mpdserver(object):
 				self.sb.player.pause()
 		else:
 			self.sb.player.playpause()
-		return 'OK/n'
+		return 'OK\n'
 	def play(self, arg):
 		if len(arg)>0:
 			self.sb.playlist.load_pos(int(arg))
 		else:
 			self.sb.player.play()
-			return 'OK/n'
+		return 'OK\n'
 	def playid(self, arg):
 		self.sb.playlist.load_id(int(arg))
-		return 'OK/n'
+		return 'OK\n'
 	def previous(self, arg):
 		self.sb.playlist.get_prev()
-		return'OK/n'
+		return'OK\n'
 	def seek(self, arg):
 		arg = arg.split()
-		if len(arg)>0:
+		if len(arg)>1:
 			self.sb.playlist.load_pos(int(arg[0]))
 			self.sb.player.setpos(int(arg[1])*self.sb.player.SECOND)
+			#TODO: seek doesn't work after load on this or seekid
 		else:
 			self.sb.player.setpos(int(arg[0])*self.sb.player.SECOND)
-		return 'OK/n'
+		return 'OK\n'
 	def seekid(self, arg):
 		arg = arg.split()
-		if len(arg)>0:
+		if len(arg)>1:
 			self.sb.playlist.load_id(int(arg[0]))
-			self.sb.player.setpos(int(arg[1])*self.sb.player.SECOND)
+			self.sb.player.setpos(int(arg[1]) * self.sb.player.SECOND)
 		else:
-			self.sb.player.setpos(int(arg[0])*self.sb.player.SECOND)
-		return 'OK/n'
+			self.sb.player.setpos(int(arg[0]) * self.sb.player.SECOND)
+		return 'OK\n'
 	def seekcur(self, arg):
-		if len(arg)>0:
-			self.sb.player.setpos(int(arg)*self.sb.player.SECOND)
-		return 'OK/n'
+		if len(arg) > 0:
+			self.sb.player.setpos(int(arg) * self.sb.player.SECOND)
+		return 'OK\n'
 	def stop(self, arg):
 		self.sb.player.stop()
-		return 'OK/n'
+		return 'OK\n'
 #Current Playlist
-			
-	def test(self, arg):
-		command = ''
-		args = ''
-		if command == 'play':
-			try:
-				if args:
-					self.sb.playlist.load_pos(pos)
-				self.sb.player.play()
-				output = 'OK\n'
-			except Exception as detail:
-				output = 'ACK 1@1 %s %s' % (command, detail) 
-				loggy.warn('mpdserver: %s' % output)
-		elif command == 'next':
-			self.sb.playlist.get_next()
-			output = 'OK\n' #TODO:handle errors? or not...
-		elif command == 'pause':
-			self.sb.player.pause()
+	def add(self, arg):
+		songid = self.sb.playlist.add_uri(str(arg).strip('\"\''))
+		if songid is not False:
 			output = 'OK\n'
-		elif command == 'playid':
-			output = 'OK\n' #TODO:
-		elif command == 'previous':
-			self.sb.playlist.get_prev()
-			output = 'OK\n'
-		elif command == 'seek':
-			#TODO: handle songpos
-			try:
-				self.sb.player.setpos(int(args))
-				output = 'OK\n'
-			except:
-				output = 'ACK MPD setpos failed %s'% int(args)
-				loggy.warn('mpserver ACK MPD setpos failed %s'% int(args))
-		elif command == 'seekid': #TODO:
-			output = 'OK\n'
-		elif command == 'stop':
-			self.sb.player.stop()
-			output = 'OK\n'
-
-		#Playback Options
-
-		elif command == 'crossfade':
-			output = 'OK\n'
-		elif command == 'mixrampdb':
-			output = 'OK\n'
-		elif command == 'mixrampdelay':
-			output = 'OK\n'
-		elif command == 'random':
-			loggy.log('MPDserver set playlist.random to ' + args)
-			if args == '0':
-				output = 'OK\n'
-				self.sb.playlist.random = False
-			elif args == '1':
-				output = 'OK\n'
-				self.sb.playlist.random = True
+		else:
+			output = 'ACK could not add file - not located in db\n'
+		return output
+	def addid(self, arg):
+		match = re.search('(.*)\s+(\d+)$', arg) #TODO: implement mpdserver.addid - does not remove pos
+		if match:
+			pos = int(match.group(2))
+			uri = match.group(1).strip('\s\'\"')
+		else:
+			uri = arg.strip('\s\'\"')
+			pos = None
+		loggy.debug('mpdserver.addid {0}:{1}'.format(uri,pos))
+		songid = self.sb.playlist.add_uri(uri, pos)
+		if songid is not False:
+			return'OK\n'
+		raise Exception('could not add file - not located in db')
+	def clear(self, arg):
+		self.sb.playlist.load_playlist([])
+		return 'OK\n'
+	def delete(self, arg):
+		arg = arg.split(':')
+		if len(arg)>1:
+			self.sb.playlist.delete_pos(int(arg[0]),int(arg[1]))
+		else:
+			self.sb.playlist.delete_pos(int(arg[0]))
+		return 'OK\n'
+#TODO: which is faster regex or string formatting - see above?
+#		match = re.search('(\d+):*(\d*)', arg)
+#		if match:
+#			self.sb.playlist.delete(int(match.group(1)), int(match.group(2)))
+#		else:
+#			return 'ACK 50@1 {{delete}} incorrect format - delete [{POS} | {START:END}]\n'
+	def deleteid(self, arg):
+		self.sb.playlist.delete_songid(int(arg))
+		return 'OK\n'
+	def move(self, arg):
+		match = re.search('(?P<fromstart>\d+):*(?P<fromend>\d*)\s*(?P<moveto>\d*)', arg)
+		if match:
+			fromstart = int(match.group('fromstart'))
+			if match.group('fromend').isdigit():
+				fromend = int(match.group('fromend'))
 			else:
-				output = 'ACK [2@0] {random} usage random 0 or random 1\n'
-			output = 'OK\n'
-		elif command == 'repeat':
-			output = 'OK\n'
-		elif command == 'setvol':
-			vol = args.strip('"')
-			if vol.isdigit() and int(vol) <=100 and int(vol) >=0 and self.sb.player.setvol(vol):
-				output = 'OK\n'
+				fromend = fromstart+1
+			if match.group('moveto').isdigit():
+				moveto = int(match.group('fromend'))
 			else:
-				loggy.log('mpdserver - could not understand setvol to ' + args[0])
-				output = 'ACK could not understand arguments\n'
-
-		elif command == 'single':
-			output = 'OK\n'
-		elif command == 'replay_gain_mode':
-			output = 'OK\n'
-		elif command == 'replay_gain_status':
-			output = 'OK\n'
-		#Current Playlist
-		elif command == 'add':
-			output = 'OK\n'
-		elif command == 'addid':
-			output = 'OK\n'
-		elif command == 'clear':
-			output = 'OK\n'
-		elif command == 'delete':
-			output = 'OK\n'
-		elif command == 'deleteid':
-			output = 'OK\n'
-		elif command == 'move':
-			output = 'OK\n'
-		elif command == 'moveid':
-			output = 'OK\n'
-		elif command == 'playlist':
-			output = 'OK\n'
-		elif command == 'playlistfind':
-			output = 'OK\n'
-		elif command == 'playlistid':
-			output = 'OK\n'
-		elif command == 'playlistinfo':
-			output = 'OK\n'
-		elif command == 'playlistsearch':
-			output = 'OK\n'
-		elif command == 'plchanges':
+				moveto = None
+			self.sb.playlist.move(fromstart, fromend, moveto)
+			return 'OK\n'
+		else:
+			return 'ACK 50@1 {{move}} incorrect format - move [{FROM} | {START:END}] {TO}\n'  #TODO: switch all these to raise
+	def moveid(self, arg):
+		songid,pos = arg.split
+		self.sb.playlist.move_id(songid, pos)
+		return 'OK\n'
+		#TODO implement -ve item
+	def playlist(self, arg):
+		output = []
+		for index, item in enumerate(self.sb.playlist.playlist):
+			uri = self.sb.sbdb.get_id_db_info(item)
+			if uri:
+				uri = uri['uri']
+			else:
+				uri = ''
+			output.append('{0}:file: {1}\n'.format(index,uri)) #TODO: ?need to strip uri to file?
+		output.append('OK\n')
+		return ''.join(output)
+	def playlistfind(self, arg):
+		return 'OK\n' #TODO: implement mpdserver.playlistfind
+	def playlistid(self, arg):
+		if len(arg)>0:
+			output = self.trackdetails([int(arg)])
+		else:
 			output = self.trackdetails(self.sb.playlist.playlist)
-			output += 'OK\n'
-		elif command == 'plchangesposid':
-			output = 'OK\n'
-		elif command == 'shuffle':
-			output = 'OK\n'
-		elif command == 'swap':
-			output = 'OK\n'
-		elif command == 'swapid':
-			output = 'OK\n'
-		#Stored playlists
-		elif command == 'listplaylist':
-			output = 'OK\n'
-		elif command == 'listplaylistinfo':
-			output = 'OK\n'
-		elif command == 'listplaylists':
-			output = 'OK\n'
-		elif command == 'load':
-			output = 'OK\n'
-		elif command == 'playlistadd':
-			output = 'OK\n'
-		elif command == 'playlistclear':
-			output = 'OK\n'
-		elif command == 'playlistdelete':
-			output = 'OK\n'
-		elif command == 'playlistmove':
-			output = 'OK\n'
-		elif command == 'rename':
-			output = 'OK\n'
-		elif command == 'rm':
-			output = 'OK\n'
-		elif command == 'save':
-			output = 'OK\n'
-		#Music db
-		elif command == 'count':
-			output = 'OK\n'
-		elif command == 'find':
-			output = 'OK\n'
-		elif command == 'findadd':
-			output = 'OK\n'
-		elif command == 'list':
-			output = 'OK\n'
-		elif command == 'listall':
-			output = 'OK\n'
-		elif command == 'listallinfo':
-			output = 'OK\n'
-		elif command == 'lsinfo':
-			output = 'OK\n'
-		elif command == 'search':
-			output = 'OK\n'
-		elif command == 'update':
-			output = 'OK\n'
-		elif command == 'rescan':
-			output = 'OK\n'
-		elif command == '':
-			output = 'OK\n'
-		#Command queueing
-
-		#Connection
-		elif command == 'close':
-			self.conn.send('OK\n')
-			self.conn.close()
-			loggy.log('MPD Connection closed by client')
-			return False
-		elif command == 'ping':
-			output = 'OK\n'
-		elif command == 'kill':
-			conn.send('OK\n')
-			conn.close()
-			loggy.die('MPD Client Killed spambox, weep!')
-		#Output
-		elif command == 'disableoutput':
-			output = 'OK\n'
-		elif command == 'enableoutput':
-			output = 'OK\n'
-		elif command == 'outputs':
-			output = 'OK\n'
-
-
-
-
+		output += 'OK\n'
+		return output
+	def playlistinfo(self, arg):
+		temp = arg.split(':')
+		if len(temp)>1:
+			start = temp[0]
+			end = temp[1]
+		else:
+			start = temp[0]
+			end = start
+		output = self.trackdetails(self.sb.playlist.playlist[start:end])
+		output.append('OK\n')
+		return ''.join(output)
+	def playlistsearch(self, arg):
+		return 'OK\n' #TODO: implement mpdserver.playlistsearch
+	def plchanges(self, arg):
+		return self.playlistid('') #TODO: implement mpdserver.plchanges
+	def plchangesposid(self, arg):
+		return self.playlistid('') #TODO: implement mpdserver.plchanges
+	def prio(self, arg):
+		return 'OK\n' #TODO: implement mpdserver.prio and mpdserver.prioid
+	def prioid(self, arg):
+		return 'OK\n'
+	def swap(self, arg): # TODO: implement mpdserver.swap and mpdserver.swapid
+		return 'OK\n'
+	def swapid(self, arg):
+		return 'OK\n'
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+			
+		
 if __name__ == "__main__":
 	#player1 = player.player()
 	#player1.load_file('/data/Music/Girl Talk/All Day/01 - Girl Talk - Oh No.mp3')

@@ -30,11 +30,13 @@ class playlist():
 				self.toggle = value
 				loggy.debug('playlist.set {0}'.format(value))
 				self.emit('changed', value)				
-	def load_playlist(self, filename):
-		self.playlist = [0,1,2,3,4,5]
+	def load_playlist(self, array):
+		self.playlist = array
 		self.position = -1
 		self.history = []
 		self.get_next()
+	def load_playlist_from_uri(self, uri):
+		pass # TODO: implement playlist.load_playlist_from_uri
 	def get_next(self, *data):
 		if self.single.get():
 			if self.repeat.get():
@@ -72,6 +74,52 @@ class playlist():
 		if (self.position<0):
 			self.position = 0
 		self.load_id(self.playlist[self.position])
+	def add_uri(self, uri, pos=None):
+		loggy.debug('playlist.add_uri '+str(uri)+str(pos))
+		songid = self.sb.sbdb.get_uri_db_info(uri)
+		if songid:
+			songid = songid['songid']
+			if pos is not None:
+				self.add_songid(songid, pos)
+			else:
+				self.add_songid(songid)
+			return songid
+		else:
+			loggy.warn('could not add uri {0} to playlist - not in db')
+			return False				
+	def add_songid(self, songid, pos=None):
+		loggy.debug('playlist.add_songid |{0}|{1}'.format(songid, pos))
+		if pos is not None:
+			self.playlist.insert(pos, songid)
+		else:
+			self.playlist.append(songid)
+	def delete_pos(self, start, end=None):
+		loggy.debug('playlist.delete_pos |{0}|{1}'.format(start, end))
+		if end is not None:
+			output = self.playlist[start:end]
+			del self.playlist[start:end]
+		else:
+			output = self.playlist[start:start]
+			del self.playlist[start]
+		return output
+	def delete_songid(self, songid):
+		pos =  self.playlist.index(int(songid))
+		del self.playlist[pos]
+	def move(self, fromstart, fromend, moveto):
+		if moveto is None:
+			moveto = len(self.playlist)
+		if fromend is None:
+			fromend = fromstart + 1
+		items = self.delete(fromstart, fromend)
+		for item in items.reverse():
+			self.playlist.insert(moveto, item)
+	def move_id(self, songid, moveto):
+		pos = self.playlist.index(int(songid))
+		self.move(pos, pos, moveto)
+	def shuffle(self):
+		pass #TODO: implement playlist.shuffle
+#TODO: docstrings and doctest
+	
 
 if __name__ == "__main__":
 	player1 = player.player()
