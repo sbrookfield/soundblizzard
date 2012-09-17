@@ -11,6 +11,10 @@ class sbdb(GObject.GObject):
 					#'''emitted when database changes'''
 					}
 	tagger = None
+	def __del__(self,arg):
+		self.conn.commit()
+		self.conn.close()
+		loggy.log('Database closing')
 	def __init__(self, soundblizzard):
 		GObject.GObject.__init__(self)
 		self.config = soundblizzard.config.config #provides direct access to config dictionary
@@ -81,6 +85,17 @@ class sbdb(GObject.GObject):
 		loggy.log('Database sqlexec:' + string)
 		self.curs.execute(string) #TODO: vulnerable to sql injection attacks - should assemble strings within execute -- use *args
 		#self.conn.commit()
+	def get_distinct(self,col, artist=None):
+		if col in self.keys:
+			if artist:
+				string ='select distinct {0} from media where artist = \'{1}\''.format(col,artist)
+			else:
+				string = 'select distinct {0} from media'.format(col)
+			self.curs.execute(string)
+			arr = self.curs.fetchall()
+			return arr
+		else:
+			raise TypeError('sbdb.get_distinct column not in keys')
 	def create_table(self, name, fields):
 		self.sqlexec('create table if not exists "%s" ( "%s" )' % (name, '" , "'.join(fields)))
 	def recreate_media_table(self):

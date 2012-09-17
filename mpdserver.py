@@ -22,7 +22,12 @@ class mpdserver(object):
 	Settings - self.port = tcp_port
 	self.host = tcp_host
 	'''
-	internal_commands = ('__class__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'handler', 'host', 'trackdetails', 'listener', 'sb', 'startserver', 'sock', 'queue', 'queueing', 'port', 'ok_queueing', 'conn', 'internal_commands')
+	#internal_commands = ('__class__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'handler', 'host', 'trackdetails', 'listener', 'sb', 'startserver', 'sock', 'queue', 'queueing', 'port', 'ok_queueing', 'conn', 'internal_commands')
+	list_of_commands = ('add', 'addid', 'channels', 'clear', 'clearerror', 'close', 'command_list_begin', 'command_list_end', 'command_list_ok_begin', 'commands', 'config', 'consume', 'count', 'crossfade', 'currentsong', 'decoders', 'delete', 'deleteid', 'disableoutput', 'enableoutput', 'find', 'findadd', 'idle', 'kill', 'list', 'listall', 'listallinfo', 'listplaylist', 'listplaylistinfo', 'listplaylists', 'load', 'lsinfo', 'mixrampdb', 'mixrampdelay', 'move', 'moveid', 'next', 'noidle', 'notcommands', 'outputs', 'password', 'pause', 'ping', 'play', 'playid', 'playlist', 'playlistadd', 'playlistclear', 'playlistdelete', 'playlistfind', 'playlistid', 'playlistinfo', 'playlistmove', 'playlistsearch', 'plchanges', 'plchangesposid', 'previous', 'prio', 'prioid', 'random', 'readmessages', 'rename', 'repeat', 'replay_gain_mode', 'replay_gain_status', 'rescan', 'rm', 'save', 'search', 'searchadd', 'searchaddpl', 'seek', 'seekcur', 'seekid', 'sendmessage', 'setvol', 'shuffle', 'single', 'stats', 'status', 'sticker', 'stop', 'subscribe', 'swap', 'swapid', 'tagtypes', 'unsubscribe', 'update', 'urlhandlers')
+	#for mapping mpd to sbdb tags
+	mpdtags = ('Artist', 'ArtistSort', 'Album', 'AlbumArtist', 'AlbumArtistSort', 'Title', 'Track', 'Name', 'Genre', 'Date', 'Composer', 'Performer', 'Disc', 'MUSICBRAINZ_ARTISTID', 	'MUSICBRAINZ_ALBUMID', 'MUSICBRAINZ_ALBUMARTISTID', 'MUSICBRAINZ_TRACKID')
+	mpdlcasetags = ('artist', 'artistsort', 'album', 'albumartist', 'albumartistsort', 'title', 'track', 'name', 'genre', 'date', 'composer', 'performer', 'disc', 'musicbrainz_artistid', 'musicbrainz_albumid', 'musicbrainz_albumartistid', 'musicbrainz_trackid')
+	sbtags = ('artist', 'artist', 'album', 'album', 'album', 'title', None, None, 'genre', 'date', None, None, None, None, None, None, None, None)
 	def __init__(self, sb):
 		self.sb = soundblizzard.soundblizzard
 		self.sb = sb
@@ -78,10 +83,9 @@ class mpdserver(object):
 				func = None
 				loggy.debug('mpdserver got {0} {1}'.format(command, args))
 				# Makes sure command is not internal function
-				if command in self.internal_commands:
-					loggy.warn('mpdserver attempt to access internals {0}'.format(command))
-				else:
-					#Searches for command in current class
+				if command in self.list_of_commands:
+					#loggy.warn('mpdserver attempt to access internals {0}'.format(command))
+				#Searches for command in current class
 					try:
 						func = getattr(self, command)
 					except Exception as detail:
@@ -98,6 +102,9 @@ class mpdserver(object):
 							loggy.warn('mpdserver: {0}'.format(output))
 							self.queueing = False
 							self.ok_queueing = False
+				else: # not in list_of_commands
+					output = 'ACK 50@1 {{{0}}} Command not in command list\n'.format (command)
+					loggy.debug('mpdserver {0} not in command list'.format(command))
 				#Handles output - with respect to list queueing
 				if not output:
 					output = 'ACK 1@1 {{{0}}} Command returned no output - not implemented yet\n'.format(command)
@@ -141,9 +148,12 @@ Title: {values[title]}
 Album: {values[album]}
 Track: {values[track-number]}/{values[track-count]}
 Date: {values[date]}
-Pos: {index}
-Id: {values[songid]}\n'''
-			output = songinfo.format(output=output, values=values, index=index)		
+Pos: \nId: {values[songid]}\n'''
+			output = songinfo.format(output=output, values=values)
+			if item in self.sb.playlist.playlist:
+				output = output.replace('Pos: \n','Pos: {0}\n'.format(self.sb.playlist.playlist.index(item)))
+			else:
+				output = output.replace('Pos: \n', '')
 		return output
 
 #Command list functions
@@ -437,6 +447,26 @@ Id: {values[songid]}\n'''
 	def list(self, arg):
 		'''list {TYPE} [ARTIST] Lists all tags of the specified type. TYPE can be any tag supported by MPD or file. ARTIST is an optional parameter when type is album, this specifies to list albums by an artist.'''
 		args = shlex.split(arg)
+		typetag = args[0].lower()
+		if len(args)<2:
+			args.append(None)
+		if typetag in self.mpdlcasetags:
+			pos = self.mpdlcasetags.index(typetag)
+			if self.sbtags[pos]:
+				arr = self.sb.sbdb.get_distinct(self.sbtags[pos], args[1])
+				print self.sbtags[pos]
+				output=''
+				for i in arr:
+					output = '{0}{1}: {2}\n'.format(output,self.mpdtags[pos],i[0])
+				output += 'OK\n'
+				return output
+			else:
+				output = '{0}: \nOK\n'.format(self.mpdtags[pos])
+				return output
+		raise Exception('list function inadequate')
+					
+				
+			
 		#if len()
 		pass
 	def listall(self, arg):
@@ -491,21 +521,99 @@ Id: {values[songid]}\n'''
 		'''config Dumps configuration values that may be interesting for the client. This command is only permitted to "local" clients (connected via UNIX domain socket).'''
 		pass
 	def commands(self, arg):
-		output = ''
-		for i in dir(self):
-			if i in self.internal_commands:
-				continue
-			else:
-				output = '{output}command: {command}\n'.format(output=output, command=i)
-		output += 'OK\n'
 		'''commands Shows which commands the current user has access to.'''
-		return output
+#		output = ''
+#		temp = []
+#		for i in self.list_of_commands:
+#			output = '{output}command: {command}\n'.format(output=output, command=i)
+#		output += 'OK\n'		
+#		print temp
+#		return output
+		return '''command: add
+command: addid
+command: clear
+command: clearerror
+command: close
+command: commands
+command: consume
+command: count
+command: crossfade
+command: currentsong
+command: decoders
+command: delete
+command: deleteid
+command: disableoutput
+command: enableoutput
+command: find
+command: findadd
+command: idle
+command: kill
+command: list
+command: listall
+command: listallinfo
+command: listplaylist
+command: listplaylistinfo
+command: listplaylists
+command: load
+command: lsinfo
+command: mixrampdb
+command: mixrampdelay
+command: move
+command: moveid
+command: next
+command: notcommands
+command: outputs
+command: password
+command: pause
+command: ping
+command: play
+command: playid
+command: playlist
+command: playlistadd
+command: playlistclear
+command: playlistdelete
+command: playlistfind
+command: playlistid
+command: playlistinfo
+command: playlistmove
+command: playlistsearch
+command: plchanges
+command: plchangesposid
+command: previous
+command: random
+command: rename
+command: repeat
+command: replay_gain_mode
+command: replay_gain_status
+command: rescan
+command: rm
+command: save
+command: search
+command: seek
+command: seekid
+command: setvol
+command: shuffle
+command: single
+command: stats
+command: status
+command: sticker
+command: stop
+command: swap
+command: swapid
+command: tagtypes
+command: update
+command: urlhandlers\nOK\n'''
+		
 	def notcommands(self, arg):
 		'''notcommands Shows which commands the current user does not have access to.'''
 		return 'OK\n'
 	def tagtypes(self, arg):
 		'''tagtypes Shows a list of available song metadata.'''
-		pass
+		output = ''
+		for i in self.mpdtags:
+			output = '{0}tagtype: {1}\n'.format(output, i)
+		output += 'OK\n'
+		return output
 	def urlhandlers(self, arg):
 		'''urlhandlers Gets a list of available URL handlers.'''
 		return '''handler: http://\nhandler: mms://\nhandler: mmsh://\nhandler: mmst://\nhandler: mmsu://\nhandler: gopher://\nhandler: rtp://\nhandler: rtsp://\nhandler: rtmp://\nhandler: rtmpt://\nhandler: rtmps://\nOK\n'''

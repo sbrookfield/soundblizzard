@@ -2,13 +2,15 @@
 
 ''' Main soundblizzard program'''
 from gi.repository import GObject
-mainloop = GObject.MainLoop()
+
 
 class soundblizzard():
 
 	def __init__(self):
+		self.mainloop = GObject.MainLoop()
 		import loggy
 		loggy.debug_setting = True
+		loggy.sb = self
 		import config
 		self.config = config.config(self)
 		import sbdb
@@ -38,6 +40,5 @@ if __name__ == "__main__":
 	sb.playlist.load_playlist([0,1,2,3,4,5])
 	sb.playlist.get_next()
 	sb.player.pause()
-
-	mainloop.run()
+	sb.mainloop.run()
 

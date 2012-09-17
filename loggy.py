@@ -10,6 +10,7 @@ except:
 #TODO: Have a null version of loggy for speed
 errors=[]
 debug_setting = False
+sb = None
 def __init__():
 	''
 def debug(message):
@@ -26,7 +27,10 @@ def die(message):
 	print '\033[91m' + time.strftime('%x %X') + '- ' + message.replace('\n','|')+ '\033[0m'
 	quit()
 def quit():
-	sys.exit() #TODO: tidy quit
+	if sb:
+		sb.mainloop.quit()
+	print 'Now killing'
+	#sys.exit() #TODO: tidy quit
 
 if __name__ == "__main__":
 	debug('Debug')
