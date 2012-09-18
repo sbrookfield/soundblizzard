@@ -8,6 +8,11 @@ except:
 	'''
 
 #TODO: Have a null version of loggy for speed
+runtime = int(time.time())
+def uptime():
+	return (int(time.time() - runtime))
+def currenttime():
+	return (int(time.time()))
 errors=[]
 debug_setting = False
 sb = None

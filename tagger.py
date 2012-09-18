@@ -22,7 +22,6 @@ class tagger(object):
 	def load_file(self, filename, callback):
 		self.load_uri("file://"+filename, callback)
 	def load_uri(self, uri, callback):
-		self.init()
 		self.reset()
 		self.uri = uri
 		self.callback = callback
@@ -34,13 +33,14 @@ class tagger(object):
 		print str(self.tags)# + str(self.duration)
 		loggy.log('Got callback, would normally exit')
 	def reset(self):
+		self.source.set_property("uri", 'file://')
 		self.player.set_state(gst.STATE_NULL)
 		self.source.set_state(gst.STATE_NULL)
-		self.player = None
-		self.source = None
+		#self.player = None
+		#self.source = None
 		self.tags = {}
 		self.uri = ''
-		self.init()
+		#self.init()
 		#self.button.set_label(gtk.STOCK_MEDIA_PLAY)
 		#self.posstr = 0
 		#self.durstr = 0

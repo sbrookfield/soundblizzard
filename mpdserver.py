@@ -12,6 +12,8 @@ import socket, loggy, soundblizzard, re, config
 from gi.repository import GObject
 import traceback #TODO: put this in loggy
 import shlex
+from time import strftime, gmtime
+
 #except:
 #    loggy.warn('Could not find required libraries: socket GObject loggy player')
 #TODO: use is not ==
@@ -135,12 +137,15 @@ class mpdserver(object):
 			values = self.sb.sbdb.get_id_db_info(item)
 			if not values:
 				values = self.sb.sbdb.blanktags
+			mtime = strftime("%Y-%M-%dT%H:%M:%SZ", gmtime(values['mtime']))
+			filename = values['uri']
+			filename = filename[len('file:///' + self.sb.config.config['libraryfolders'][0]):]
 			#print values
 			#output = "%sfile: %s\nLast-Modified: %s\nTime: %s\nArtist: %s\nAlbumArtist: %s\nTitle: %s\nAlbum: %s Track: %s/%s\nDate: %s\nPos: %s\nId: %s\n" % \
 			#(output, values['uri'], values['mtime'], values['duration'], values['artist'], values['album-artist'], values['title'], values['album'], \
 			#values['track-number'], values['track-count'], values['date'],index, values['songid'])
-			songinfo ='''{output}file: {values[uri]}
-Last-Modified: {values[mtime]}
+			songinfo ='''{output}file: {filename}
+Last-Modified: {mtime}
 Time: {values[duration]}
 Artist: {values[artist]}
 AlbumArtist: {values[album-artist]}
@@ -149,7 +154,7 @@ Album: {values[album]}
 Track: {values[track-number]}/{values[track-count]}
 Date: {values[date]}
 Pos: \nId: {values[songid]}\n'''
-			output = songinfo.format(output=output, values=values)
+			output = songinfo.format(output=output, values=values, mtime = mtime, filename = filename)
 			if item in self.sb.playlist.playlist:
 				output = output.replace('Pos: \n','Pos: {0}\n'.format(self.sb.playlist.playlist.index(item)))
 			else:
@@ -188,9 +193,9 @@ Pos: \nId: {values[songid]}\n'''
 			output += 'OK\n'
 			return output
 	def idle(self, arg):
-		return 'changed: database update stored_playlist playlist player mixer output options sticker subscription message\nOK\n'#TODO: handle properly
+		return ' '#changed: database update stored_playlist playlist player mixer output options sticker subscription message\nOK\n'#TODO: handle properly
 	def noidle(self,arg):
-		pass
+		return 'OK\n'
 	def status(self, arg):
 		output = 'volume: %i\n' % (self.sb.player.vol) #TODO: get rid of % and +=
 		output += 'repeat: %i\n' % (int(self.sb.playlist.repeat.get()))
@@ -212,7 +217,7 @@ Pos: \nId: {values[songid]}\n'''
 		output += 'OK\n'
 		return output
 	def stats(self, arg):
-		return 'artists: %i\nalbums: %i\nsongs: %i\nuptime: %i\nplaytime: %i\ndb_playtime: %i\ndb_update: %i\nOK\n' % (1,1,1,1,1,1,1) #TODO: stats
+		return 'artists: %i\nalbums: %i\nsongs: %i\nuptime: %i\nplaytime: %i\ndb_playtime: %i\ndb_update: %i\nOK\n' % (self.sb.sbdb.get_total_artists(),self.sb.sbdb.get_total_albums(),self.sb.sbdb.get_total_songs(),loggy.uptime(),1,self.sb.sbdb.get_total_duration(),self.sb.config.config['dbupdatetime']) #TODO: stats
 #Playback options
 	def consume(self, arg):
 		self.sb.playlist.consume.set(int(arg))
@@ -407,7 +412,8 @@ Pos: \nId: {values[songid]}\n'''
 		pass
 	def listplaylistinfo(self, arg):
 		'''listplaylistinfo {NAME} Lists the songs with metadata in the playlist. Playlist plugins are supported.'''
-		pass
+		output =  'ACK [50@0] {listplaylistinfo} No such playlist\n'
+		return output
 	def listplaylists(self,arg):
 		'''listplaylists Prints a list of the playlist directory. After each playlist name the server sends its last modification time as attribute "Last-Modified" in ISO 8601 format. To avoid problems due to clock differences between clients and the server, clients should not compare this value with their local clock.'''
 		pass
@@ -454,7 +460,7 @@ Pos: \nId: {values[songid]}\n'''
 			pos = self.mpdlcasetags.index(typetag)
 			if self.sbtags[pos]:
 				arr = self.sb.sbdb.get_distinct(self.sbtags[pos], args[1])
-				print self.sbtags[pos]
+				#print self.sbtags[pos]
 				output=''
 				for i in arr:
 					output = '{0}{1}: {2}\n'.format(output,self.mpdtags[pos],i[0])
@@ -464,11 +470,7 @@ Pos: \nId: {values[songid]}\n'''
 				output = '{0}: \nOK\n'.format(self.mpdtags[pos])
 				return output
 		raise Exception('list function inadequate')
-					
-				
-			
-		#if len()
-		pass
+		return
 	def listall(self, arg):
 		'''listall [URI] Lists all songs and directories in URI.'''
 		pass

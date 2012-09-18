@@ -9,11 +9,12 @@ class config(object):
 	def __init__(self, soundblizzard):
 		#load defaults first then config file then command line args
 		self.config = { 'configfile' : os.path.expanduser('~/.config/soundblizzard/soundblizzard.conf'),
-									'libraryfolders' : ['~/music'], #TODO: support multiple folders
+									'libraryfolders' : [os.path.expanduser('~/music')], #TODO: support multiple folders
 									'playlistfolder' : '~/.config/playlists',
-									'databasefile' : os.path.expanduser('~/.config/sounblizzard/soundblizzard.db'),
+									'databasefile' : os.path.expanduser('~/.config/soundblizzard/soundblizzard.db'),
 									'mpdhost' : 'localhost',
-									'mpdport' : 6600
+									'mpdport' : 6600,
+									'dbupdatetime' : loggy.currenttime()
 								}
 			
 		if (not(os.path.isdir(os.path.dirname(self.config['configfile'])))):
@@ -53,6 +54,7 @@ class config(object):
 		self.save_config()
 
 if __name__ == "__main__":
-	config = config()
+	temp = 'foo'
+	config = config(temp)
 		
 		

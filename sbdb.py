@@ -1,5 +1,5 @@
 try:
-	import loggy, os, sqlite3, mimetypes, tagger
+	import loggy, os, sqlite3, mimetypes, tagger, soundblizzard
 except:
 	loggy.warn('sbdb - Could not find required libraries: loggy, os, sqlite3, mimetypes, tagger, gobject, config')
 from gi.repository import GObject
@@ -15,13 +15,16 @@ class sbdb(GObject.GObject):
 		self.conn.commit()
 		self.conn.close()
 		loggy.log('Database closing')
-	def __init__(self, soundblizzard):
+	def __init__(self, sb):
 		GObject.GObject.__init__(self)
-		self.config = soundblizzard.config.config #provides direct access to config dictionary
-		if (not(os.path.isdir(os.path.dirname(self.config['databasefile'])))):
+		self.sb = soundblizzard.soundblizzard # fakes for tab completion
+		self.sb = sb
+		
+		#self.config = soundblizzard.config.config #provides direct access to config dictionary
+		if (not(os.path.isdir(os.path.dirname(self.sb.config.config['databasefile'])))):
 			loggy.warn ('Creating directories for requested database file')
-			os.makedirs(os.path.dirname(self.config['databasefile'])) or loggy.warn ('...could not create config dir')
-		self.dbpath = self.config['databasefile'] 
+			os.makedirs(os.path.dirname(self.sb.config.config['databasefile'])) or loggy.warn ('...could not create config dir')
+		self.dbpath = self.sb.config.config['databasefile'] 
 		loggy.log("Database: Loading database from " + self.dbpath)
 		if loggy.debug:
 			sqlite3.enable_callback_tracebacks(True)
@@ -109,6 +112,23 @@ class sbdb(GObject.GObject):
 #		self.emit('database-changed')
 #		data = [str(item) for item in data]
 #		self.sqlexec('insert into "%s" values ( "%s" )' % (table, str('" , "'.join(data))))
+	def get_total_duration(self):
+		'''Gets total duration of media files in database in seconds'''
+		self.curs.execute('select sum(duration) from media')
+		result = self.curs.fetchone()[0]
+		return result
+	def get_total_songs(self):
+		self.curs.execute('select count(uri) from media')
+		result = self.curs.fetchone()[0]
+		return result
+	def get_total_artists(self):
+		self.curs.execute('select count(distinct artist) from media')
+		result = self.curs.fetchone()[0]
+		return result
+	def get_total_albums(self):
+		self.curs.execute('select count(distinct album) from media')
+		result = self.curs.fetchone()[0]
+		return result
 	def insert_media(self, data):
 		data = tuple(data)
 		string = "insert into 'media' values ( ?" + " , ? "*(len(data)-1) + " )"
@@ -146,18 +166,20 @@ class sbdb(GObject.GObject):
 #		return zip((self.totkeys), list(self.curs.fetchone()))
 	def update_db(self):
 		#self.recreate_media_table() 
+		self.sb.config.config['dbupdatetime'] = loggy.currenttime()
 		self.totag = []
 		if not self.tagger:
 			self.tagger = tagger.tagger()
-		for folder in self.config['libraryfolders']:
+		for folder in self.sb.config.config['libraryfolders']:
 			loggy.log('ELE '+folder)
 			for path, dirs, files in os.walk(folder):
 				for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files ]:
 					row = self.get_uri_db_info('file://'+filename)
 					if row:
-						(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(filename)
+						mtime = int(os.path.getmtime(filename))
+						#(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(filename)
 						#print ' old {0}, new {1} mtimes'.format(row['mtime'], mtime)
-						if mtime <= row['mtime']:
+						if mtime >= row['mtime']:
 							continue
 					mime = mimetypes.guess_type(filename)[0] #TODO: get rid of mimetype
 					if not mime:
@@ -177,9 +199,10 @@ class sbdb(GObject.GObject):
 	def recreate_db(self):
 		self.recreate_media_table() 
 		self.totag = []
+		self.sb.config.config['dbupdatetime'] = loggy.currenttime()
 		if not self.tagger:
 			self.tagger = tagger.tagger()
-		for folder in self.config['libraryfolders']:
+		for folder in self.sb.config.config['libraryfolders']:
 			loggy.log('ELE '+folder)
 			for path, dirs, files in os.walk(folder):
 				for filename in [os.path.abspath(os.path.join(path, filename)) for filename in files ]:
@@ -218,11 +241,11 @@ class sbdb(GObject.GObject):
 		self.tagger.tags['uri'] = self.tagger.uri
 		self.tagger.tags['mime'] = type
 		#print self.tagger.uri[7:]
-		(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.tagger.uri[7:])
+		#(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.tagger.uri[7:])
 		#filetemp = Gio.file_new_for_uri(self.tagger.uri) #file_new_for_uri
 		#temp.query_info('*',flags=gio.FILE_QUERY_INFO_NONE, cancellable=None)
 		#info = filetemp.query_info('standard::mtime')
-		self.tagger.tags['mtime'] = mtime
+		self.tagger.tags['mtime'] = int(os.path.getmtime(self.tagger.uri[7:]))
 		if len(type)>0:
 			#try:
 				row = []
