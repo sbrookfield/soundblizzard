@@ -473,7 +473,19 @@ Pos: \nId: {values[songid]}\n'''
 		return
 	def listall(self, arg):
 		'''listall [URI] Lists all songs and directories in URI.'''
-		pass
+		arg = arg.strip()
+		urilist = self.sb.sbdb.get_files()
+		output = ''
+		if len(urilist) == 0:
+			raise Exception('no media found in that location')
+		elif arg:
+			for uri in urilist:
+				if uri[0].startswith(arg):
+					output = '{0}file: {1}\n'.format(output, uri[0])
+		else:
+			for uri in urilist:
+				output = '{0}file: {1}\n'.format(output, uri[0])
+		return output
 	def listallinfo(self, arg):
 		'''listallinfo [URI] Same as listall, except it also returns metadata info in the same format as lsinfo.'''
 		pass

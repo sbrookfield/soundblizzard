@@ -1,0 +1,29 @@
+Language model created by QuickLM on Fri Sep 14 13:01:29 EDT 2012
+Copyright (c) 1996-2000
+Carnegie Mellon University and Alexander I. Rudnicky
+
+This model based on a corpus of 2 sentences and 4 words
+The (fixed) discount mass is 0.5
+
+\data\
+ngram 1=4
+ngram 2=4
+ngram 3=2
+
+\1-grams:
+-0.7782 </s> -0.3010
+-0.7782 <s> -0.2218
+-1.0792 BACKWARD -0.2218
+-1.0792 FORWARD -0.2218
+
+\2-grams:
+-0.6021 <s> BACKWARD 0.0000
+-0.6021 <s> FORWARD 0.0000
+-0.3010 BACKWARD </s> -0.3010
+-0.3010 FORWARD </s> -0.3010
+
+\3-grams:
+-0.3010 <s> BACKWARD </s>
+-0.3010 <s> FORWARD </s>
+
+\end\

@@ -2,7 +2,7 @@
 Created on 8 Apr 2012
 
 @author: sam
-Adds debug capabilities to stdin/stdout - can type commands on stdin using sounblizzard.x interface and these will be eval'ed and outputted onto stdout
+Adds debug capabilities to stdin/stdout - can type commands on stdin using soundblizzard.x interface and these will be eval'ed and outputted onto stdout
 Performs this by adding watch onto mainloop for stdin so when data on stdin this is analysed
 '''
 import sys

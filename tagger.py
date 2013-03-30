@@ -13,9 +13,15 @@ class tagger(object):
 	'''
 	Tagger - opens gstreamer pipeline, gets tags and duration
 	''' #TODO: Meta mux stream? Tidy all starts to files!, comments
+	def autoplug_continue(self, bin, pad, caps):
+		bin.link(self.sink)
+		print caps.to_string()
+		print 'GOTOOOO'
 	def __init__(self):  #wait till load_file?
-		self.player = gst.parse_launch('uridecodebin name=source ! fakesink')
+		self.player = gst.parse_launch('uridecodebin name=source ! fakesink name=sink')
 		self.source = self.player.get_by_name("source")
+		#self.source.connect('autoplug-continue', self.autoplug_continue)
+		self.sink = self.player.get_by_name("sink")
 		self.bus = self.player.get_bus()
 		self.bus.add_signal_watch()
 		self.bus.connect("message", self.on_message)
@@ -28,14 +34,16 @@ class tagger(object):
 		loggy.log( "Tagger loading " + uri)
 		self.source.set_property("uri", uri)
 		self.player.set_state(gst.STATE_PAUSED)
+		#self.source.link(self.sink)
 
 	def test(self):
 		print str(self.tags)# + str(self.duration)
 		loggy.log('Got callback, would normally exit')
 	def reset(self):
-		self.source.set_property("uri", 'file://')
-		self.player.set_state(gst.STATE_NULL)
-		self.source.set_state(gst.STATE_NULL)
+		self.__init__()
+		#self.source.set_property("uri", 'file://')
+		#self.player.set_state(gst.STATE_NULL)
+		#self.source.set_state(gst.STATE_NULL)
 		#self.player = None
 		#self.source = None
 		self.tags = {}

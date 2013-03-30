@@ -4,7 +4,7 @@ except:
 	loggy.warn('sbdb - Could not find required libraries: loggy, os, sqlite3, mimetypes, tagger, gobject, config')
 from gi.repository import GObject
 #from gi.repository import Gio
-
+import loggy, os, sqlite3, mimetypes, tagger, soundblizzard
 class sbdb(GObject.GObject):
 	__gsignals__ = {
 					'database-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
@@ -31,7 +31,7 @@ class sbdb(GObject.GObject):
 		self.conn = sqlite3.connect(self.dbpath) or loggy.warn('Could not connect to database')
 		self.conn.row_factory = sqlite3.Row
 		self.curs = self.conn.cursor()
-		self.conn.row_factory = sqlite3.Row
+		self.curs.row_factory = sqlite3.Row
 		self.keys = ('artist',
 											'title',
 											'album',
@@ -129,7 +129,12 @@ class sbdb(GObject.GObject):
 		self.curs.execute('select count(distinct album) from media')
 		result = self.curs.fetchone()[0]
 		return result
+	def get_files(self):
+		self.curs.execute('select uri from media')
+		result = self.curs.fetchall()
+		return result
 	def insert_media(self, data):
+		loggy.log('Database insert media' + str(data))
 		data = tuple(data)
 		string = "insert into 'media' values ( ?" + " , ? "*(len(data)-1) + " )"
 		self.curs.execute(string, data)
@@ -255,7 +260,7 @@ class sbdb(GObject.GObject):
 					else:
 						row.append(None)
 				self.insert_media(row)
-				self.insert_media(row)
+				#self.insert_media(row)
 		self.gettag()
 		#TODO: convert to gio/uris, see test/gio       stat, etc
 

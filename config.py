@@ -19,7 +19,7 @@ class config(object):
 			
 		if (not(os.path.isdir(os.path.dirname(self.config['configfile'])))):
 			os.makedirs(os.path.dirname(self.config['configfile'])) or loggy.warn ('could not create config dir')
-#		if (not (os.path.isfile('~/.config/sounblizzard/soundblizzard.conf')))
+#		if (not (os.path.isfile('~/.config/soundblizzard/soundblizzard.conf')))
 		try:
 			self.config.update(json.load(open(self.config['configfile'], 'r'))) #adds config file to dictionary and overrides with config file
 		except:
