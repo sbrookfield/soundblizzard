@@ -26,13 +26,13 @@ class soundblizzard():
 		debug.soundblizzard = self
 		import mpdserver
 		self.mpdserver = mpdserver.mpdserver(self)
-		#self.mpdserver.startserver('192.168.0.4', 6601)
+		self.mpdserver.startserver('192.168.0.4', 6601)
 
 
 		#import dbus_mpris
 		#self.dbus_mpris = dbus_mpris.dbus_mpris(self)
-		#import gui
-		#self.gtkgui = gui.GTKGui(self)
+		import gui
+		self.gtkgui = gui.GTKGui(self)
 		
 
 if __name__ == "__main__":

@@ -17,11 +17,9 @@
             <child>
               <object class="GtkButton" id="button2">
                 <property name="label">gtk-media-previous</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="get_prev" swapped="no"/>
               </object>
@@ -34,11 +32,9 @@
             <child>
               <object class="GtkButton" id="button1">
                 <property name="label">gtk-media-play</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_playbutton_click" swapped="no"/>
                 <signal name="map" handler="is_play_button" swapped="no"/>
@@ -52,11 +48,9 @@
             <child>
               <object class="GtkButton" id="button3">
                 <property name="label">gtk-media-next</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="get_next" swapped="no"/>
               </object>
@@ -69,11 +63,9 @@
             <child>
               <object class="GtkToggleButton" id="togglebutton1">
                 <property name="label" translatable="yes">Random</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <signal name="map" handler="is_random_toggle" swapped="no"/>
               </object>
               <packing>
@@ -85,11 +77,9 @@
             <child>
               <object class="GtkToggleButton" id="togglebutton2">
                 <property name="label" translatable="yes">Repeat</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <signal name="map" handler="is_repeat_toggle" swapped="no"/>
               </object>
               <packing>
@@ -101,11 +91,9 @@
             <child>
               <object class="GtkToggleButton" id="togglebutton3">
                 <property name="label" translatable="yes">Single</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <signal name="map" handler="is_single_toggle" swapped="no"/>
               </object>
               <packing>
@@ -117,11 +105,9 @@
             <child>
               <object class="GtkToggleButton" id="togglebutton4">
                 <property name="label" translatable="yes">Consume</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <signal name="map" handler="is_consume_toggle" swapped="no"/>
               </object>
               <packing>
@@ -209,12 +195,25 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVolumeButton" id="volumebutton1">
-                <property name="use_action_appearance">False</property>
+              <object class="GtkToggleButton" id="togglebutton5">
+                <property name="label">gtk-fullscreen</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="map" handler="is_fullscreen_toggle" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">11</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVolumeButton" id="volumebutton1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="orientation">vertical</property>
@@ -230,7 +229,7 @@ audio-volume-medium</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">11</property>
+                <property name="position">12</property>
               </packing>
             </child>
           </object>

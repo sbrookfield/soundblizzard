@@ -3,6 +3,7 @@
 import soundblizzard
 import player, loggy, gst, cairo
 from gi.repository import Gtk
+from gi.repository import GdkPixbuf
 from gi.repository import GdkX11
 from gi.repository import GObject
 #TODO: look at kiwi for pygtk lists etc.
@@ -25,7 +26,7 @@ class GTKGui(object):
 		self.WIDGETS = 3
 
 
-		self.widgets={'consume_toggles':[],'repeat_toggles':[],'single_toggles':[],'random_toggles':[],'play_buttons':[], 'progress_bars':[], 'position_labels':[], 'info_labels':[]}
+		self.widgets={'consume_toggles':[],'repeat_toggles':[],'single_toggles':[],'random_toggles':[],'play_buttons':[], 'progress_bars':[], 'position_labels':[], 'info_labels':[], 'fullscreen_widgets':[]}
 		self.sb = soundblizzard.soundblizzard # fakes for tab completion
 		self.sb = sb
 		self.sb.player.connect('async-done', self.on_async_done)
@@ -36,6 +37,9 @@ class GTKGui(object):
 		self.builder.connect_signals(self)
 		#widgets = self.builder.get_objects()
 		self.window = self.builder.get_object("window1")
+		self.window.set_title("SoundBlizzard")
+		#pixbuf = GdkPixbuf.Pixbuf.new_from_file('/home/sam/Code/Eclipse workspace/soundblizzard/logo.png')
+		self.window.set_icon_from_file('/home/sam/Code/Eclipse workspace/soundblizzard/logo.png')
 		self.get_widgets('window')
 		for window in self.widgets['window']:
 			window.show()
@@ -98,6 +102,22 @@ class GTKGui(object):
 	def is_play_button(self, widget):
 		#print 'playbutton found'
 		self.widgets['play_buttons'].append(widget)#TODO: check for duplicates
+	def is_fullscreen_toggle(self,widget):
+		self.widgets['fullscreen_widgets'].append(widget)
+		widget.get_parent_window()
+		widget.connect('toggled',self.on_fullscreen_toggle)
+		#def change_fullscreen_toggle(self):
+		widget.get_parent_window().connect('window-state-event',self.on_window_state_event)
+	def on_window_state_event(self):
+		print (widget)
+		print ('LoL')
+	def on_fullscreen_toggle(self, widget):
+		if (widget.get_label() == 'gtk-fullscreen'):
+			widget.get_parent_window().fullscreen()
+			widget.set_label('gtk-leave-fullscreen')
+		else:
+			widget.get_parent_window().unfullscreen()
+			widget.set_label('gtk-fullscreen')
 	def on_progress_bar_change_value (self, value_range, scroll, value, data=None):
 		self.sb.player.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, value)
 	def is_progress_bar(self, widget):
@@ -201,8 +221,9 @@ class GTKGui(object):
 			img.write(self.sb.player.tags['image'])
 			img.close()
 			for album_art in self.album_arts:
-				album_art.connect('draw', self.draw_album_art, album_art)
-				cairo.ImageSurface.create_from_png("w")
+				pass
+				#album_art.connect('draw', self.draw_album_art, album_art)
+				#cairo.ImageSurface.create_from_png(filename)
 				#album_art.set_from_file(file)
 				#self.on_image_resize(album_art, None)
 #    def draw_album_art(self, widget):
@@ -306,7 +327,7 @@ class GTK_media_view(Gtk.HBox):
 		#print player.sbdb.get_uri_db_info("file:///home/sam/Music/POPCORN.MP3")
 		#self.list_store.append(self.sb.sbdb.get_uri_db_info("file:///home/sam/Music/POPCORN.MP3"))
 
-		arsy = (GObject.TYPE_STRING,)*len(self.sb.sbdb.totkeys)
+		arsy = (GObject.TYPE_STRING,)*len(self.sb.sbdb.keys)
 		self.list_store = Gtk.ListStore(*arsy)
 		print( ' row length = ' + str(self.list_store.get_n_columns()))
 		self.sb.sbdb.iter(self.list_store.append)
@@ -317,7 +338,7 @@ class GTK_media_view(Gtk.HBox):
 		widget.set_model(self.list_store) # init treeview
 
 		widget.tv_columns = {}
-		for i, name in enumerate(self.sb.sbdb.totkeys): # go through all keys
+		for i, name in enumerate(self.sb.sbdb.keys): # go through all keys
 			if name in self.keystoshowdict: #check if column is to display
 				widget.tv_columns[name] = Gtk.TreeViewColumn(name)
 				widget.insert_column(widget.tv_columns[name], self.keystoshowdict[name]) # inserts column in order from keystoshow
@@ -340,8 +361,8 @@ class GTK_media_view(Gtk.HBox):
 		loggy.debug('gui.GTK_media_view.treeview_activated')
 		(model, iterat) = treeview.get_selection().get_selected()
 		if iterat:
-			self.sb.playlist.load_id(self.list_store.get_value(iterat,len(self.sb.sbdb.totkeys)-1))
-			self.sb.playlist.playlist = [self.list_store.get_value(iterat,len(self.sb.sbdb.totkeys)-1)]
+			self.sb.playlist.load_id(self.list_store.get_value(iterat,len(self.sb.sbdb.keys)-1))
+			self.sb.playlist.playlist = [self.list_store.get_value(iterat,len(self.sb.sbdb.keys)-1)]
 	def tv_clicked(self, widget, i):
 		loggy.debug('gui.GTK_media_view.tv_clicked')
 		widget.set_sort_column_id(i)

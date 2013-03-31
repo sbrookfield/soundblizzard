@@ -46,8 +46,10 @@ class config(object):
 		loggy.log('Configuration:' +str(self.config))		
 	def save_config(self):
 		try:
-			self.configfd = open(self.config['configfile'], 'w')
+			configfd = open(self.config['configfile'], 'w')
 			json.dump(self.config, self.configfd, sort_keys=True, indent=2)
+			configfd.close()
+
 		except:
 			loggy.warn('Could not save config file to '+self.config['configfile'])
 	def __del__(self):
