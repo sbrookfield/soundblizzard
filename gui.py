@@ -232,6 +232,8 @@ class GTKGui(object):
 
 	def is_album_art(self, widget):
 		self.album_arts.append(widget)
+		print('got image '+str(widget))
+		widget.set_from_file('logo16.png')
 		#self.on_image_resize(widget, None)
 #	def redraw_album_art(self, widget, event):
 #		print 'image redraw'
