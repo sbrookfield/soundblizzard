@@ -40,7 +40,7 @@ class GTKGui(object):
 		self.window.set_title("SoundBlizzard")
 		self.window.connect('delete-event', Gtk.main_quit)
 		#pixbuf = GdkPixbuf.Pixbuf.new_from_file('/home/sam/Code/Eclipse workspace/soundblizzard/logo.png')
-		self.window.set_icon_from_file('/home/sam/Code/Eclipse workspace/soundblizzard/logo.png')
+		self.window.set_icon_from_file('logo.png')
 		self.get_widgets('window')
 		for window in self.widgets['window']:
 			window.show()
