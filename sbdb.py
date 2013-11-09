@@ -1,8 +1,11 @@
+#!/usr/bin/python
+from gi.repository import GObject
 try:
-	import loggy, os, sqlite3, mimetypes, tagger, soundblizzard
+	import loggy, os, sqlite3, mimetypes, tagger,config
 except:
 	loggy.warn('sbdb - Could not find required libraries: loggy, os, sqlite3, mimetypes, tagger, gobject, config')
-from gi.repository import GObject
+import soundblizzard
+
 #from gi.repository import Gio
 import loggy, os, sqlite3, mimetypes, tagger, soundblizzard
 class sbdb(GObject.GObject):
@@ -11,7 +14,7 @@ class sbdb(GObject.GObject):
 					#'''emitted when database changes'''
 					}
 	tagger = None
-	def __del__(self,arg):
+	def __del__(self,sb):
 		self.conn.commit()
 		self.conn.close()
 		loggy.log('Database closing')
@@ -104,6 +107,10 @@ class sbdb(GObject.GObject):
 	def recreate_media_table(self):
 		self.sqlexec('drop table if exists \'media\' ')
 		self.sqlexec('create table if not exists "%s" ("%s" INTEGER PRIMARY KEY ASC )' % ('media', '" , "'.join(self.keys)))
+		#Create history table also
+		self.sqlexec(string)
+		self.sqlexec('drop table if exists \'media-history\' ')
+		self.sqlexec('create table if not exists "%s" ("%s" INTEGER PRIMARY KEY ASC )' % ('media-history', '" , "'.join(self.keys)))
 		#NB id must be last to make primary key
 	def recreate_table(self, name, fields):
 		self.sqlexec('drop table if exists "%s" ' % name)
@@ -266,10 +273,15 @@ class sbdb(GObject.GObject):
 
 
 
-
+#Does not work without soundblizzard really -
 if __name__ == "__main__":
-	db = sbdb()
-	db.get_types()
+	class tempclass:
+		def __init__(self):
+			self.config = config.config(self)
+	temp = tempclass()
+	temp.config = config.config(temp)
+	db = sbdb(temp)
+	#db.get_types()
 	db.recreate_db()
 
 

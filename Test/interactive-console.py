@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-# -*- Mode: python; c-basic-offset: 4 -*-
-#
-# Interactive PyGtk Console, Johan Dahlin 2002
-#
+#!/usr/bin/python
+
 
 import os
 import signal

@@ -20,10 +20,15 @@ class config(object):
 		if (not(os.path.isdir(os.path.dirname(self.config['configfile'])))):
 			os.makedirs(os.path.dirname(self.config['configfile'])) or loggy.warn ('could not create config dir')
 #		if (not (os.path.isfile('~/.config/soundblizzard/soundblizzard.conf')))
+		fd = None
 		try:
-			self.config.update(json.load(open(self.config['configfile'], 'r'))) #adds config file to dictionary and overrides with config file
+			fd = open(self.config['configfile'], 'r')#tries to open config file
 		except:
-			loggy.warn('Could not load config file')	
+			loggy.warn('Could not open config file '+ self.config['configfile'])
+		try:
+			self.config.update(json.load(fd)) #adds config file to dictionary and overrides with config file
+		except:
+			loggy.warn('Could not read config file '+ self.config['configfile'])
 		
 		#Handle command line arguments	
 		#Splits command line args into dict, if key starts with -- then takes this as an argument and prints these
@@ -45,12 +50,14 @@ class config(object):
 		self.config.update(c)
 		loggy.log('Configuration:' +str(self.config))		
 	def save_config(self):
+		configfd = open(self.config['configfile'], 'w')
+		json.dump(self.config, configfd, sort_keys=True, indent=2)
 		try:
-			configfd = open(self.config['configfile'], 'w')
-			json.dump(self.config, self.configfd, sort_keys=True, indent=2)
+			
+			json.dump(self.config, configfd, sort_keys=True, indent=2)
 			configfd.close()
-
 		except:
+			import loggy
 			loggy.warn('Could not save config file to '+self.config['configfile'])
 	def __del__(self):
 		self.save_config()
@@ -58,5 +65,7 @@ class config(object):
 if __name__ == "__main__":
 	temp = 'foo'
 	config = config(temp)
+	config.save_config()
+
 		
 		
