@@ -5,7 +5,9 @@ class TestWindow(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self, title="Button Demo")
 		self.connect("delete-event", Gtk.main_quit)
-		self.add(AspectImage('../logo.png'))
+		temp = Gtk.Box()
+		self.add(temp)
+		temp.add(AspectImage('logo.png'))
 class AspectImage(Gtk.Viewport):
 	oldx = 0
 	oldy = 0
@@ -21,7 +23,8 @@ class AspectImage(Gtk.Viewport):
 		self.scrollwindow.add_with_viewport(self.box)		
 		self.pixbuf = GdkPixbuf.Pixbuf().new_from_file(image)
 		self.image = Gtk.Image().new_from_pixbuf(self.pixbuf)
-		self.box.add(self.image)		
+		self.box.add(self.image)
+		self.show_all()		
 	def resizeImage(self, x, y):
 		print('Resizing Image to ('+str(x)+','+str(y)+')....')
 		pixbuf = self.pixbuf.scale_simple(x, y, GdkPixbuf.InterpType.BILINEAR)
@@ -34,7 +37,7 @@ class AspectImage(Gtk.Viewport):
 		self.oldy = alloc.height
 		self.box.set_allocation(alloc)
 		self.resizeImage(alloc.width,alloc.height)
-		
-win = TestWindow()
-win.show_all()
-Gtk.main()
+if __name__ == "__main__":
+	win = TestWindow()
+	win.show_all()
+	Gtk.main()

@@ -40,6 +40,4 @@ GObject.io_add_watch(sys.stdin, GObject.IO_IN|GObject.IO_HUP|GObject.IO_PRI, oot
 
 if __name__ == '__main__':
 	loop = GObject.MainLoop()
-
-#if __name__ == '__main__':
-#	loop.run()
+	loop.run()

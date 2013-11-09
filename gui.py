@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #try:
 import soundblizzard
-import player, loggy, gst, cairo
+import player, loggy, gst, cairo, aspectimage
 from gi.repository import Gtk
 from gi.repository import GdkPixbuf
 from gi.repository import GdkX11
@@ -108,7 +108,7 @@ class GTKGui(object):
 		widget.get_parent_window()
 		widget.connect('toggled',self.on_fullscreen_toggle)
 		#def change_fullscreen_toggle(self):
-		widget.get_parent_window().connect('window-state-event',self.on_window_state_event)
+		#widget.get_parent_window().connect('window-state-event',self.on_window_state_event)
 	def on_window_state_event(self):
 		print (widget)
 		print ('LoL')
@@ -231,9 +231,17 @@ class GTKGui(object):
 #        print (widget + 'fart')
 
 	def is_album_art(self, widget):
+		#image = aspectimage.AspectImage('logo.png')
+		image = Gtk.Image()
+		image.set_from_file('logo.png')
+		widget.pack_start(image,True, True, 0)
+		widget.show_all()
+		#widget.add(art)
+		widget.show()
 		self.album_arts.append(widget)
 		print('got image '+str(widget))
-		widget.set_from_file('logo16.png')
+		#widget.set_from_file('logo16.png')
+		
 		#self.on_image_resize(widget, None)
 #	def redraw_album_art(self, widget, event):
 #		print 'image redraw'
@@ -304,6 +312,10 @@ class GTKGui(object):
 		self.slave_windows[0].show_all()
 		self.builder.connect_signals(self)
 	def slave_enter_now_playing_view(self):
+		self.slave_view = GTK_now_playing(self.sb)
+		self.slave_windows[0].pack_start(self.slave_view, True, True,0)
+		self.slave_windows[0].show_all()
+		self.builder.connect_signals(self)
 		loggy.debug('gui.slave_enter_now_playing_view')
 	def slave_enter_preferences_view(self):
 		self.slave_view = GTK_preferences(self.sb)
@@ -400,8 +412,11 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 		True
 	def on_button1_clicked(self):
 		True
-class GTK_now_playing(object):
-	def __init__(self):
+class GTK_now_playing(Gtk.DrawingArea):
+	def __init__(self,sb):
+		print "in the monkey"
+		Gtk.DrawingArea.__init__(self)
+		sb.gtkgui.is_video_out(self)
 		True
 
 if __name__ == "__main__":

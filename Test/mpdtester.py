@@ -1,10 +1,8 @@
 #!/usr/bin/python
 import socket, sys, difflib
 from gi.repository import GObject
-mainloop = GObject.MainLoop()
 listen_ports = {}
 recent_text = {}
-
 def handle_data(source, condition, port):
     data = source.recv(1024)
     if len(data) > 0:
@@ -36,4 +34,6 @@ def send_input(conn, condition):
 add_listen_port('localhost',6600)
 add_listen_port('localhost',6601)
 GObject.io_add_watch(sys.stdin, GObject.IO_IN|GObject.IO_HUP|GObject.IO_PRI, send_input)
-mainloop.run()
+if __name__ == '__main__':
+    mainloop = GObject.MainLoop()
+    mainloop.run()
