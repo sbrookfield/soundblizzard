@@ -50,22 +50,24 @@ class config(object):
 		self.config.update(c)
 		loggy.log('Configuration:' +str(self.config))		
 	def save_config(self):
-		configfd = open(self.config['configfile'], 'w')
-		json.dump(self.config, configfd, sort_keys=True, indent=2)
-		try:
-			
-			json.dump(self.config, configfd, sort_keys=True, indent=2)
-			configfd.close()
-		except:
-			import loggy
-			loggy.warn('Could not save config file to '+self.config['configfile'])
-	def __del__(self):
-		self.save_config()
+		#import json
+		configfd = open(self.config['configfile'], 'w') or loggy.warn('Could not open config file for writing')
+		json.dump(self.config, configfd, sort_keys=True, indent=2) #or loggy.warn ('Could not write config file')
+		configfd.close()
+#		try:
+#			
+#			json.dump(self.config, configfd, sort_keys=True, indent=2)
+#			configfd.close()
+#		except:
+#			import loggy
+#			loggy.warn('Could not save config file to '+self.config['configfile'])
+#	def __del__(self, soundblizzard=None):
+		#self.save_config()
 
 if __name__ == "__main__":
 	temp = 'foo'
-	config = config(temp)
-	config.save_config()
+	conf = config(temp)
+	conf.save_config()
 
 		
 		

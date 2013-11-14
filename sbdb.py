@@ -14,10 +14,10 @@ class sbdb(GObject.GObject):
 					#'''emitted when database changes'''
 					}
 	tagger = None
-	def __del__(self,sb):
-		self.conn.commit()
-		self.conn.close()
-		loggy.log('Database closing')
+	#def __del__(self,sb=None):
+	#	self.conn.commit()
+	#	self.conn.close()
+	#	loggy.log('Database closing')
 	def __init__(self, sb):
 		GObject.GObject.__init__(self)
 		self.sb = soundblizzard.soundblizzard # fakes for tab completion
@@ -52,7 +52,7 @@ class sbdb(GObject.GObject):
 											#'dtime', 
 											#'size',
 											'uri',
-											'songid')
+											'songid')#songid must be last as it's the primary key
 		self.blanktags = {'artist':'',
 											'title':'',
 											'album':'',
@@ -72,6 +72,8 @@ class sbdb(GObject.GObject):
 											'uri':'',
 											'songid':None
 											}
+
+		
 		#self.keys = self.blanktags.keys()[0:10]#('uri', 'artist', 'title', 'album', 'date', 'genre', 'duration', 'rating','album-artist', 'track-count', 'track-number') # + mimetype , atime, mtime, ctime, dtime #TODO:autogenerate from blank dict
 		#self.addkeys = self.blanktags.keys()[10:] #('mimetype', 'atime', 'mtime', 'ctime', 'dtime', 'size')
 		#self.totkeys = self.keys + self.addkeys +('songid',)
@@ -107,11 +109,66 @@ class sbdb(GObject.GObject):
 	def recreate_media_table(self):
 		self.sqlexec('drop table if exists \'media\' ')
 		self.sqlexec('create table if not exists "%s" ("%s" INTEGER PRIMARY KEY ASC )' % ('media', '" , "'.join(self.keys)))
-		#Create history table also
-		self.sqlexec(string)
-		self.sqlexec('drop table if exists \'media-history\' ')
-		self.sqlexec('create table if not exists "%s" ("%s" INTEGER PRIMARY KEY ASC )' % ('media-history', '" , "'.join(self.keys)))
+		self.recreate_media_history_table()
+	def recreate_media_history_table(self):
+		#self.sqlexec('drop table if exists \'media-history\' ')
+		#self.sqlexec('create table if not exists "%s" ("%s" INTEGER PRIMARY KEY ASC )' % ('media-history', '" , "'.join(self.keys)))
 		#NB id must be last to make primary key
+		#see http://souptonuts.sourceforge.net/readme_sqlite_tutorial.html
+		#creates table with column for new and old versions of all media table columns, plus an integer corresponding to history and the sqlaction performed
+		historykeys = []
+		for i in self.keys:
+			historykeys.extend(((i+'-new'),(i+'-old')))
+		#historykeys.extend(('sqlaction','historyid'))
+		valuekeys = []
+		for i in self.keys:
+			valuekeys.extend((('new.\''+i),('old.\''+i)))
+		historykeysnew = []
+		for i in self.keys:
+			historykeysnew.append((i+'-new'))
+		valuekeysnew = []
+		for i in self.keys:
+			valuekeysnew.append(('new.\''+i))
+		historykeysold = []
+		for i in self.keys:
+			historykeysold.append((i+'-old'))
+		valuekeysold = []
+		for i in self.keys:
+			valuekeysold.append(('old.\''+i))
+
+		sqlstatement = '''
+drop table if exists \'media-history\' ;
+create table \'media-history\' (\'{0}\', sqlaction , historyid INTEGER PRIMARY KEY ASC AUTOINCREMENT);
+--  Create an update trigger --
+CREATE TRIGGER \'update-media-history\' AFTER UPDATE ON media
+BEGIN
+  INSERT INTO \'media-history\'  (\'{0}\', sqlaction , historyid)
+          values ({1}', 'UPDATE', NULL);
+END;
+--  Also create an insert trigger
+--    NOTE  AFTER keyword --
+CREATE TRIGGER \'insert-media-history\' AFTER INSERT ON media
+BEGIN
+INSERT INTO \'media-history\'  ('{2}', sqlaction, historyid)
+          values ({3}', 'INSERT', NULL);
+END;
+--  Also create a DELETE trigger --
+CREATE TRIGGER \'delete-media-history\' DELETE ON media
+BEGIN
+INSERT INTO \'media-history\'  ('{4}', sqlaction, historyid)
+	values ({5}', 'DELETE', NULL);
+END;
+'''.format( ('\', \''.join(historykeys)), ('\', '.join(valuekeys)),('\', \''.join(historykeysnew)), ('\', '.join(valuekeysnew)),('\', \''.join(historykeysold)), ('\', '.join(valuekeysold))  )
+
+
+
+		print ('\n\nkeys'+str(self.keys))
+		print ('Historykeys:'+str(historykeys))
+		print ('Valuekeys:'+str(valuekeys))
+		print (sqlstatement)
+		self.curs.executescript(sqlstatement)
+		self.conn.commit()
+
 	def recreate_table(self, name, fields):
 		self.sqlexec('drop table if exists "%s" ' % name)
 		self.sqlexec('create table "%s" ("%s")' % (name, '" , "'.join(fields)))
@@ -266,8 +323,8 @@ class sbdb(GObject.GObject):
 						row.append(self.tagger.tags[key])
 					else:
 						row.append(None)
+				print (str(row))
 				self.insert_media(row)
-				#self.insert_media(row)
 		self.gettag()
 		#TODO: convert to gio/uris, see test/gio       stat, etc
 
@@ -283,5 +340,7 @@ if __name__ == "__main__":
 	db = sbdb(temp)
 	#db.get_types()
 	db.recreate_db()
+	db.conn.commit()
+	GObject.MainLoop().run()
 
 

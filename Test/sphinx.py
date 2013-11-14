@@ -49,8 +49,8 @@ class DemoApp(object):
 		asr.connect('partial_result', self.asr_partial_result)
 		asr.connect('result', self.asr_result)
 		asr.set_property('configured', True)
-		asr.set_property('lm', '/home/sam/git/soundblizzard/Test/sphinx/6764.lm')
-		asr.set_property('dict', '/home/sam/git/soundblizzard/Test/sphinx/6764.dic')
+		#asr.set_property('lm', '/home/sam/git/soundblizzard/Test/sphinx/6764.lm')
+		#asr.set_property('dict', '/home/sam/git/soundblizzard/Test/sphinx/6764.dic')
 
 		bus = self.pipeline.get_bus()
 		bus.add_signal_watch()

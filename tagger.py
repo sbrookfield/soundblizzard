@@ -3,12 +3,11 @@ try:
 	import pygst
 	pygst.require("0.10")
 	import gst
-	import gobject
 	import loggy
 	import datetime
 except:
 	loggy.warn('Could not find required libraries: pygst, gst, gobject, datetime')
-
+from gi.repository import GObject
 class tagger(object):
 	'''
 	Tagger - opens gstreamer pipeline, gets tags and duration
@@ -84,4 +83,4 @@ class tagger(object):
 if __name__ == "__main__":
 	tagger1 = tagger()
 	tagger1.load_uri('file:///music/06 - Gorillaz - Superfast Jellyfish.mp3', tagger1.test)
-	gobject.MainLoop().run()
+	GObject.MainLoop().run()
