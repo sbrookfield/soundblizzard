@@ -1,13 +1,23 @@
 #!/usr/bin/python
+
+import logging
+_log = logging.getLogger(__name__)
+logging.basicConfig()
+_log.setLevel(logging.DEBUG)
+
+from gi.repository import GObject
 try:
 	import pygst
 	pygst.require("0.10")
 	import gst
 	import loggy
-	import datetime
-except:
+#	import datetime
+except: 
 	loggy.warn('Could not find required libraries: pygst, gst, gobject, datetime')
-from gi.repository import GObject
+GObject.threads_init()
+
+
+
 class tagger(object):
 	'''
 	Tagger - opens gstreamer pipeline, gets tags and duration
@@ -53,6 +63,7 @@ class tagger(object):
 		#self.durstr = 0
 		#self.statusbar.push(0, "0:00 / 0:00")
 	def on_message(self, bus, message):
+		print str(message.type) + 'ben'
 		if message.type == gst.MESSAGE_TAG: # thanks to http://www.jezra.net/blog/use_python_and_gstreamer_to_get_the_tags_of_an_audio_file
 			taglist = message.parse_tag()
 			for key in taglist.keys():
@@ -82,5 +93,5 @@ class tagger(object):
 			#loggy.log( "Player GST message unhandled:" + str(message.type))
 if __name__ == "__main__":
 	tagger1 = tagger()
-	tagger1.load_uri('file:///music/06 - Gorillaz - Superfast Jellyfish.mp3', tagger1.test)
+	tagger1.load_uri('file:///home/sam/Music/Darwin Deez/Songs for Imaginative People/04. No Love.mp3', tagger1.test)
 	GObject.MainLoop().run()

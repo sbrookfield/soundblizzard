@@ -408,9 +408,20 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 	def on_button3_clicked(self, button):
 		loggy.debug('GTK_media_view.on_button3_clicked')
 		self.sb.sbdb.recreate_db()
-	def on_button2_clicked(self):
+	def on_button1_clicked(self, button):
+		Folderbox = Gtk.FileChooserDialog("Please select a folder containing media", self.sb.gtkgui.window, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+		Folderbox.set_default_size(800,400)
+		Folderbox.set_select_multiple(True)
+		Folderbox.set_local_only(False)
+		
+		response = Folderbox.run()
+		if response == Gtk.ResponseType.OK:
+			loggy.log("Gui adding media folder: " + str(Folderbox.get_filenames()))
+			self.sb.config.config['libraryfolders'] = self.sb.config.config['libraryfolders'] + Folderbox.get_filenames()
+			
+		Folderbox.destroy()
 		True
-	def on_button1_clicked(self):
+	def on_button2_clicked(self, button):
 		True
 class GTK_now_playing(Gtk.DrawingArea):
 	def __init__(self,sb):

@@ -33,8 +33,10 @@ class soundblizzard():
 		
 if __name__ == "__main__":
 	sb = soundblizzard()
-	sb.playlist.load_playlist([0,1,2,3,4,5])
-	sb.playlist.get_next()
-	sb.player.pause()
+	#sb.playlist.load_playlist([0,1,2,3,4,5])
+	#sb.playlist.get_next()
+	#sb.player.load_file('/home/sam/Music/Darwin Deez/Darwin Deez/04 DNA.mp3')
+	#sb.player.pause()
+	#TODO player quits when no file to play instead of returning error
 	sb.mainloop.run()
 
