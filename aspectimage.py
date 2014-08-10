@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from gi.repository import Gtk, Gdk, GdkPixbuf
 #Thanks to Bobble - https://developer.gnome.org/gtk3/stable/GtkScrolledWindow.html
 #Not sure if theres a better way to do this
