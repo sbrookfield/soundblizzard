@@ -5,15 +5,16 @@ _log = logging.getLogger(__name__)
 logging.basicConfig()
 _log.setLevel(logging.DEBUG)
 
-from gi.repository import GObject
 try:
 	import pygst
 	pygst.require("0.10")
 	import gst
 	import loggy
-#	import datetime
+	import datetime
 except: 
 	loggy.warn('Could not find required libraries: pygst, gst, gobject, datetime')
+from gi.repository import GObject
+
 GObject.threads_init()
 
 

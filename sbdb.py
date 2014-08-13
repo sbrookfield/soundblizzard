@@ -4,10 +4,10 @@ try:
 	import loggy, os, sqlite3, mimetypes, tagger,config
 except:
 	loggy.warn('sbdb - Could not find required libraries: loggy, os, sqlite3, mimetypes, tagger, gobject, config')
-import soundblizzard
+#import soundblizzard
 
 #from gi.repository import Gio
-import loggy, os, sqlite3, mimetypes, tagger, soundblizzard
+import loggy, os, sqlite3, mimetypes, tagger
 class sbdb(GObject.GObject):
 	__gsignals__ = {
 					'database-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
