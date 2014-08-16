@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 #try:
-import soundblizzard
-import player, loggy, gst, cairo, aspectimage
-from gi.repository import Gtk
-from gi.repository import GdkPixbuf
-from gi.repository import GdkX11
-from gi.repository import GObject
+try:
+	import gi, loggy, player
+	gi.require_version('Gst', '1.0')
+	from gi.repository import GObject, Gst, Gtk, GdkPixbuf, GdkX11
+except:
+	loggy.warn('Gui could not import required libraries')
+# import soundblizzard
+# import player, loggy, gst, cairo, aspectimage
+# from gi.repository import Gtk
+# from gi.repository import GdkPixbuf
+# from gi.repository import GdkX11
+# from gi.repository import GObject
 #TODO: look at kiwi for pygtk lists etc.
 #pyGtk.require("2.0")
 #except:
@@ -62,8 +68,8 @@ class GTKGui(object):
 		self.sb.player.connect('position-changed', self.on_position_change)
 		self.sb.player.connect('play-state-changed', self.on_play_state_change)
 	def debug(self, data=None):
-		print 'debug got'
-		print data
+		print ('debug got')
+		print (data)
 
 	def get_widgets(self, name):
 		'''Searches Gtkbuilder for widgets with name1, name2, name3 etc and adds them to self.widgets[name]'''
@@ -425,15 +431,16 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 		True
 class GTK_now_playing(Gtk.DrawingArea):
 	def __init__(self,sb):
-		print "in the monkey"
+		print ("in the monkey")
 		Gtk.DrawingArea.__init__(self)
 		sb.gtkgui.is_video_out(self)
 		True
 
 if __name__ == "__main__":
 	temp = ''
-	player1 = player.player(temp)
+	player1 = player.player
 	#sbdb1 = sbdb.sbdb()
+	temp.player = player1
 	loggy.debug_setting = True
 	app = GTKGui(temp)
 	Gtk.main()

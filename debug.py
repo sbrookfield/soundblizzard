@@ -11,7 +11,7 @@ def oot(fd, condition):
 	'''takes line from fd using readline and evals this, returning result of eval and any exceptions'''
 	print('oot\n')
 	text = fd.readline()
-	sb = soundblizzard
+	#sb = soundblizzard
 #	if text.startswith('int'):
 #		import code
 #		import readline
@@ -22,9 +22,10 @@ def oot(fd, condition):
 	try:		
 		global soundblizzard
 		global sb
+		sb = soundblizzard
 		print(eval(text))
 	except Exception as inst:
-		print inst
+		print (inst)
 		pass
 	return True
 #fd = sys.stdin.fileno()
@@ -33,5 +34,6 @@ def oot(fd, condition):
 GObject.io_add_watch(sys.stdin, GObject.IO_IN|GObject.IO_HUP|GObject.IO_PRI, oot)
 
 if __name__ == '__main__':
+	soundblizzard = None
 	loop = GObject.MainLoop()
 	loop.run()

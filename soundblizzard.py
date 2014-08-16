@@ -2,7 +2,6 @@
 
 ''' Main soundblizzard program'''
 from gi.repository import GObject
-import gst
 
 
 class soundblizzard():

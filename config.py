@@ -41,8 +41,7 @@ class config(object):
 		c ={}
 		for key in b:
 			if key.startswith('--help'):
-				loggy.warn ('Soundblizzard media player\nTo amend config settings please use --key \'value\' on the command line. \n Current values:')
-				print json.dumps(self.config, sort_keys=True, indent=2)
+				loggy.warn ('Soundblizzard media player\nTo amend config settings please use --key \'value\' on the command line. \n Current values:\n'+ json.dumps(self.config, sort_keys=True, indent=2))				
 				loggy.die('help delivered')
 			elif key.startswith('--'):
 				c[key[2:]] = b[key]

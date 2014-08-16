@@ -8,7 +8,7 @@ Big thanks to the excellent documentation of MPD at http://www.musicpd.org/doc/p
 '''
 #try:
 #TODO: out = "<html>%(head)s%(prologue)s%(query)s%(tail)s</html>" % locals() change all var substitutions to this, it's faster, see http://wiki.python.org/moin/PythonSpeed/PerformanceTips
-import socket, loggy, soundblizzard, re, config
+import socket, loggy, re, config, soundblizzard
 from gi.repository import GObject
 import traceback #TODO: put this in loggy
 import shlex

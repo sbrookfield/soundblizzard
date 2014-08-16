@@ -16,6 +16,11 @@
 #
 #		You should have received a copy of the GNU General Public License
 #		along with Soundblizzard.	If not, see <http://www.gnu.org/licenses/>.
+'''
+Created on 16th August 2014
+
+@author: Sam Brookfield
+'''
 
 if __name__ == '__main__':
 	None

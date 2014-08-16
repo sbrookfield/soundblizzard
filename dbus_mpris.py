@@ -20,7 +20,7 @@ class dbus_mpris_caps(object):
 	CAN_SEEK              = 1 << 4
 	CAN_PROVIDE_METADATA  = 1 << 5
 	CAN_HAS_TRACKLIST     = 1 << 6
-
+MprisCaps = dbus_mpris_caps()
 EXAILE_CAPS = (MprisCaps.CAN_GO_NEXT | MprisCaps.CAN_GO_PREV | MprisCaps.CAN_PAUSE | MprisCaps.CAN_PLAY | MprisCaps.CAN_SEEK | MprisCaps.CAN_PROVIDE_METADATA | MprisCaps.CAN_HAS_TRACKLIST)
 class dbus_mpris(dbus.service.Object):
 	INTERFACE_NAME = 'org.mpris.MediaPlayer2'
@@ -29,7 +29,7 @@ class dbus_mpris(dbus.service.Object):
 		self.bus = dbus.SessionBus()
 		bus_name = dbus.service.BusName('org.gnome.SoundBlizzard', self.bus)
 		dbus.service.Object.__init__(self, bus_name, '/org/mpris/MediaPlayer2')
-	@dbus.service.method(self.INTERFACE_NAME)
+	@dbus.service.method(INTERFACE_NAME)
 	def hello(self):
 		return 'Hell Yeah'
 
