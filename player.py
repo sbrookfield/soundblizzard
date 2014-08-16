@@ -1,11 +1,31 @@
 #!/usr/bin/python
-from gi.repository import GObject
-import pygst, loggy
-pygst.require("0.10")
-import gst
+import gi, sbdb, config, loggy
+gi.require_version('Gst', '1.0')
+from gi.repository import GObject, Gst,GdkX11, GstVideo
+GObject.threads_init()
+Gst.init(None)#TODO check all modules for this
 #TODO: manage import dependencies
 #TODO: use xrange instead of range, see http://wiki.python.org/moin/PythonSpeed/PerformanceTips
 #TODO: try profiling http://wiki.python.org/moin/PythonSpeed/PerformanceTips
+dbtags = {'artist':'',
+        'title':'',
+        'album':'',
+        'date':0, 
+        'genre':'', 
+        'duration':0, 
+        'rating':0,
+        'album-artist':'', 
+        'track-count':1, 
+        'track-number':1,
+        #'mimetype':'', 
+        #'atime':0, 
+        #'mtime':0, 
+        #'ctime':0, 
+        #'dtime':0, 
+        #'size':0,
+        #'uri':'',
+        #'songid':None
+        }
 class player(GObject.GObject):
 	'''
 	Player - gst player object
@@ -34,13 +54,13 @@ class player(GObject.GObject):
 		self.soundblizzard = soundblizzard
 		#self.debug = False
 		self.vidout = {}
-		self.player = gst.Pipeline('pipeline')
-		self.playbin = gst.element_factory_make("playbin", "player")
-		self.vis = gst.element_factory_make("goom", "vis")
-		self.videosink = gst.element_factory_make("xvimagesink", 'videosink')
-		#self.videosink = gst.element_factory_make('fakesink', 'videosink')
+		self.player = Gst.Pipeline()
+		self.playbin = Gst.ElementFactory.make("playbin", "player")
+		self.vis = Gst.ElementFactory.make("goom", "vis")
+		self.videosink = Gst.ElementFactory.make("xvimagesink", 'videosink')
+		#self.videosink = Gst.element_factory_make('fakesink', 'videosink')
 		#self.videosink.set_property('async', False) # required for fakesink otherwise pipeline stops
-		self.audiosink = gst.element_factory_make("autoaudiosink", 'audiosink')
+		self.audiosink = Gst.ElementFactory.make("autoaudiosink", 'audiosink')
 
 		self.playbin.set_property("vis-plugin", self.vis)
 		self.playbin.set_property("video-sink", self.videosink)
@@ -73,75 +93,75 @@ class player(GObject.GObject):
 		loggy.log( "Player loading " + uri )
 		self.uri = uri
 		self.playbin.set_property("uri", uri)
-		self.player.set_state(gst.STATE_PLAYING)
+		self.player.set_state(Gst.State.PLAYING)
 	def reset(self):
-		self.player.set_state(gst.STATE_NULL)
+		self.player.set_state(Gst.State.NULL)
 		#for tag in self.
 		self.tags = self.soundblizzard.sbdb.blanktags.copy()
 	def on_message(self, bus, message):
-		if message.type == gst.MESSAGE_EOS: #TODO: reorder for speed , or take signals out individually...
+		if message.type == Gst.MessageType.EOS: #TODO: reorder for speed , or take signals out individually...
 			self.emit('eos')#called when end of stream reached
-		elif message.type == gst.MESSAGE_ERROR:
+		elif message.type == Gst.MessageType.ERROR:
 			self.reset()
 			err, debug = message.parse_error()
 			loggy.warn( "Player GST_MESSAGE_ERROR: " + str(err) + str(debug))
 			self.emit('eos')
-		elif message.type == gst.MESSAGE_STATE_CHANGED:
+		elif message.type == Gst.MessageType.STATE_CHANGED:
 			if message.src == self.player:
 				self.updatestate()
-		elif message.type == gst.MESSAGE_STREAM_STATUS:
+		elif message.type == Gst.MessageType.STREAM_STATUS:
 			#loggy.log('ss') appears to be related to buffering status
 			#self.update_position()
 			None
-		elif message.type == gst.MESSAGE_NEW_CLOCK:
+		elif message.type == Gst.MessageType.NEW_CLOCK:
 			None
-		elif message.type == gst.MESSAGE_ASYNC_DONE:
+		elif message.type == Gst.MessageType.ASYNC_DONE:
 			self.emit('async-done')
 			loggy.log('Player Async Done')
-		elif message.type == gst.MESSAGE_TAG: # thanks to http://www.jezra.net/blog/use_python_and_gstreamer_to_get_the_tags_of_an_audio_file
+		elif message.type == Gst.MessageType.TAG: # thanks to http://www.jezra.net/blog/use_python_and_gstreamer_to_get_the_tags_of_an_audio_file
 			taglist = message.parse_tag()
-			for key in taglist.keys():
-				self.tags[key] = taglist[key]
 			#gst_tag_list_free()?
-		elif message.type == gst.MESSAGE_DURATION:
-			self.updatedur()
-		elif message.type == gst.MESSAGE_QOS:
+			for key in dbtags.keys():
+				self.tags[key] = taglist.get_value_index(key, 0)
+		elif message.type == Gst.MessageType.DURATION_CHANGED:
+			self.updatedur()#could query message?
+		elif message.type == Gst.MessageType.QOS:
 			loggy.log('QOS')
-		elif message.type == gst.MESSAGE_ELEMENT:
+		elif message.type == Gst.MessageType.ELEMENT:
 			if message.structure is None:
 				return
-			message_name = message.structure.get_name()
-			if message_name == "prepare-xwindow-id":
-				imagesink = message.src
-				loggy.warn('Player prepare-xwindow-id got')
-				imagesink.set_property("force-aspect-ratio", True)
+			message_name = message.get_structure().get_name()
+			if message_name == "prepare-window-handle":
+				loggy.warn('Player prepare-window-handle got')
+				message.src.set_property("force-aspect-ratio", True)
 				#gtk.gdk.threads_enter()
-				if self.vidout.has_key('xid'): imagesink.set_xwindow_id(self.vidout['xid'])
+				if self.vidout.has_key('xid'): message.src.set_window_handle(self.vidout['xid'])
 				#imagesink.set_xwindow_id(self.VID.window.xid)
 				#gtk.gdk.threads_leave()
 			elif message_name == "have-xwindow-id":
 				loggy.log('have xwindow id')
 			else:
 				loggy.log( "Player GST message unhandled:" + str(message.type))
+		elif message.type == Gst.MessageType.STREAM_START: None
 		else:
 			loggy.warn('Player - unknown messge' + str(message.type))
 		#TODO: remove message from buffer?
 	def play(self):
-		self.player.set_state(gst.STATE_PLAYING)
+		self.player.set_state(Gst.State.PLAYING)
 	def pause(self):
-		self.player.set_state(gst.STATE_PAUSED)
+		self.player.set_state(Gst.State.PAUSED)
 	def stop(self):
-		self.player.set_state(gst.STATE_NULL)
+		self.player.set_state(Gst.State.NULL)
 	def playpause(self):
 		loggy.debug('player.playpause')
-		if self.player.get_state()[1] == gst.STATE_PLAYING:
-			self.player.set_state(gst.STATE_PAUSED)
+		if self.player.get_state(1)[1] == Gst.State.PLAYING: #?need to add timeout to get state?
+			self.player.set_state(Gst.State.PAUSED)
 		else:
-			self.player.set_state(gst.STATE_PLAYING)
+			self.player.set_state(Gst.State.PLAYING)
 	def setpos(self, posns):
 		'''Sets current position of track in nanoseconds'''
 		if (posns<(self.durns) and posns>=0):
-			self.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, posns)
+			self.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, posns)
 			loggy.log('seeking to |' + str(posns) + 'ns|')
 			return True #TODO: check pipeline changes?
 		else:
@@ -152,10 +172,10 @@ class player(GObject.GObject):
 		if self.state == 'stop':
 			return False
 		else:
-			ns = int(self.player.query_position(gst.FORMAT_TIME, None)[0])
+			ns = int(self.player.query_position(1)[0])
 			if (self.posns != ns):
 				self.posns = ns
-				self.possec = int(self.posns / gst.SECOND)
+				self.possec = int(self.posns / Gst.SECOND)
 				self.posstr = "%02d:%02d" % (self.possec // 60, self.possec % 60)
 				self.emit('position-changed')
 			return True
@@ -164,10 +184,10 @@ class player(GObject.GObject):
 		if self.state == 'stop':
 			return 0
 		else:
-			ns = int(self.player.query_duration(gst.FORMAT_TIME)[0])
+			ns = int(self.player.query_duration(Gst.Format.TIME)[0])
 			if (self.durns != ns and ns != None):
 				self.durns = int(ns)
-				self.dursec = int(self.durns / gst.SECOND)
+				self.dursec = int(self.durns / Gst.SECOND)
 				self.durstr = "%02d:%02d" % (self.dursec // 60, self.dursec % 60)
 				self.emit('duration-changed')
 	def setvol(self, vol):
@@ -181,10 +201,10 @@ class player(GObject.GObject):
 			self.emit('volume-changed')
 		return True
 	def updatestate(self):
-		state = self.player.get_state()[1]
-		if state == gst.STATE_PLAYING:
+		state = self.player.get_state(1)[1]
+		if state == Gst.State.PLAYING:
 			state = 'play'
-		elif state == gst.STATE_PAUSED:
+		elif state == Gst.State.PAUSED:
 			state =  'pause'
 		else:
 			state = 'stop'
@@ -198,6 +218,10 @@ class player(GObject.GObject):
 GObject.type_register(player)
 
 if __name__ == "__main__":
-	player1 = player(None)
+	soundblizzard = ''
+	soundblizzard.config = config.config(soundblizzard)
+	soundblizzard.sbdb = sbdb.sbdb(soundblizzard)
+	
+	player1 = player(soundblizzard)
 	player1.load_uri('file:///home/sam/Music/Popcorn.mp3')
 	GObject.MainLoop().run()

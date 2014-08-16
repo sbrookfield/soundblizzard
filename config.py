@@ -41,7 +41,7 @@ class config(object):
 		c ={}
 		for key in b:
 			if key.startswith('--help'):
-				loggy.warn ('Soundblizzard media player\nTo amend config settings please use --key \'value\' on the command line. \n Current values:\n'+ json.dumps(self.config, sort_keys=True, indent=2))				
+				loggy.warn ('Soundblizzard media player\nTo amend config settings please use --key \'value\' on the command line. \n Current values:\n'+ json.dumps(self.config, sort_keys=True, indent=2))
 				loggy.die('help delivered')
 			elif key.startswith('--'):
 				c[key[2:]] = b[key]
@@ -53,6 +53,7 @@ class config(object):
 		configfd = open(self.config['configfile'], 'w') or loggy.warn('Could not open config file for writing')
 		json.dump(self.config, configfd, sort_keys=True, indent=2) #or loggy.warn ('Could not write config file')
 		configfd.close()
+		loggy.log('Saved config to ' + self.config['configfile'] + ' Contents' + json.dumps(self.config, sort_keys=True, indent=2))
 #		try:
 #			
 #			json.dump(self.config, configfd, sort_keys=True, indent=2)

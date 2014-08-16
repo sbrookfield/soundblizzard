@@ -55,11 +55,14 @@ class mpdserver(object):
 		self.conn, temp = sock.accept()
 		loggy.log( "mpdserver connected from " + str(self.conn.getsockname()))
 		GObject.io_add_watch(self.conn, GObject.IO_IN, self.handler)
-		self.conn.send('OK MPD 0.16.0\n')
+		print('fishes\n')
+		self.conn.sendall(bytes('OK MPD 0.16.0\n', 'UTF-8'))
+		#self.conn.
 		return True
 	def handler(self, conn, *args):
 		'''Asynchronous connection handler. Processes each line from the socket.'''
-		buff = conn.recv(65536) #TODO: handle if more on conn to recieve than 4096
+		buff = conn.recv(65536).decode('UTF-8') #TODO: handle if more on conn to recieve than 4096
+		
 		if not len(buff):
 			loggy.log( "mpdserver Connection closed - no input." )
 			return False
@@ -68,6 +71,8 @@ class mpdserver(object):
 		#loggy.log('MPD Server got:' +buff)
 		while '\n' in buff:
 			(line, buff) = buff.split("\n", 1)
+		#lines = buff.split('\n')
+		#for line in lines:
 			output = ''
 			if not len(line):
 				loggy.log( "mpdserver Connection closed - no input." )
@@ -128,7 +133,7 @@ class mpdserver(object):
 				#send output
 				if (output != None):
 					loggy.debug( 'MPD Server sending: {0}'.format( output) )
-					conn.send(output)
+					conn.sendall(bytes(output, 'UTF-8'))
 		return True
 				#TODO: reflection, stickers, client to client
 	def trackdetails (self, pl):
@@ -657,22 +662,12 @@ command: urlhandlers\nOK\n'''
 	def sendmessage(self, arg):
 		'''sendmessage {CHANNEL} {TEXT} Send a message to the specified channel.'''
 		pass	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-			
+		
 		
 if __name__ == "__main__":
 	#player1 = player.player()
 	#player1.load_file('/data/Music/Girl Talk/All Day/01 - Girl Talk - Oh No.mp3')
+	print('Test section mpdserver')
 	mpdserver1 = mpdserver(None)
 	mpdserver1.startserver('', 6600)
 	GObject.MainLoop().run()

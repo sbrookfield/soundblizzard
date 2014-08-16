@@ -213,7 +213,7 @@ END;
 		row_arr = []
 		for row_array in self.curs:
 			for i in row_array:
-				row_arr.append(unicode(i))
+				row_arr.append(str(i))
 			callback(row_arr)
 			row_arr=[]
 #	def get_types(self):

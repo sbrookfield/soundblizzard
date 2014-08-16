@@ -33,7 +33,7 @@ class GTKGui(object):
 
 
 		self.widgets={'consume_toggles':[],'repeat_toggles':[],'single_toggles':[],'random_toggles':[],'play_buttons':[], 'progress_bars':[], 'position_labels':[], 'info_labels':[], 'fullscreen_widgets':[]}
-		self.sb = soundblizzard.soundblizzard # fakes for tab completion
+		#self.sb = soundblizzard.soundblizzard # fakes for tab completion
 		self.sb = sb
 		self.sb.player.connect('async-done', self.on_async_done)
 		self.master_tree_load()
@@ -126,7 +126,8 @@ class GTKGui(object):
 			widget.get_parent_window().unfullscreen()
 			widget.set_label('gtk-fullscreen')
 	def on_progress_bar_change_value (self, value_range, scroll, value, data=None):
-		self.sb.player.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, value)
+		self.sb.player.setpos(value)
+		#self.sb.player.player.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, value)
 	def is_progress_bar(self, widget):
 		#print 'progress bar found'
 		self.widgets['progress_bars'].append(widget)
