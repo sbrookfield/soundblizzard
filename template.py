@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-#		Copyright 2011-2012 Samuel James Brookfield
+#		Copyright 2011-2014 Samuel James Brookfield
 #
 #		This file is part of Soundblizzard.
 #
