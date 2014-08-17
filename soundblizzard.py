@@ -28,8 +28,8 @@ class soundblizzard():
 		self.mpdserver.startserver('localhost', 6601)
 		#import dbus_mpris
 		#self.dbus_mpris = dbus_mpris.dbus_mpris(self)
-		#import gui
-		#self.gtkgui = gui.GTKGui(self)
+		import gui
+		self.gtkgui = gui.GTKGui(self)
 		
 if __name__ == "__main__":
 	sb = soundblizzard()

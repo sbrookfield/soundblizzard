@@ -402,9 +402,16 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 		self.builder.add_from_file('glade/preferences.glade')
 		some_widget = self.builder.get_object("notebook1")
 		some_widget.reparent(self)
-
-		
+		self.folderview = self.builder.get_object("treeview1")
 		self.builder.connect_signals(self)
+		self.folderstore = Gtk.ListStore(str)
+		for folder in self.sb.config.config['libraryfolders']:
+			self.folderstore.append([folder])
+		self.folderview.set_model(self.folderstore)
+		renderer = Gtk.CellRendererText()
+		column = Gtk.TreeViewColumn("Folders", renderer, text=0)
+		self.folderview.append_column(column)
+		True
 		#self.show_all()
 		#self.add(some_widget)
 		#some_widget.show()
@@ -415,6 +422,7 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 	def on_button3_clicked(self, button):
 		loggy.debug('GTK_media_view.on_button3_clicked')
 		self.sb.sbdb.recreate_db()
+		True
 	def on_button1_clicked(self, button):
 		Folderbox = Gtk.FileChooserDialog("Please select a folder containing media", self.sb.gtkgui.window, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
 		Folderbox.set_default_size(800,400)
@@ -425,10 +433,20 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 		if response == Gtk.ResponseType.OK:
 			loggy.log("Gui adding media folder: " + str(Folderbox.get_filenames()))
 			self.sb.config.config['libraryfolders'] = self.sb.config.config['libraryfolders'] + Folderbox.get_filenames()
-			
+			self.sb.config.save_config()
+			for folder in Folderbox.get_filenames():
+				self.folderstore.append([folder])			
 		Folderbox.destroy()
 		True
 	def on_button2_clicked(self, button):
+		selection = self.folderview.get_selection()
+		model, treeiter = selection.get_selected()
+		if treeiter != None:
+			loggy.log ("Removing " + model[treeiter][0] + "from folderlist")
+			self.sb.config.config['libraryfolders'].remove(model[treeiter][0])
+			self.folderstore.remove(treeiter)
+			self.sb.config.save_config()
+			#now redo list store
 		True
 class GTK_now_playing(Gtk.DrawingArea):
 	def __init__(self,sb):
