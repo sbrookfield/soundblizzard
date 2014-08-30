@@ -26,8 +26,8 @@ class soundblizzard():
 		import mpdserver
 		self.mpdserver = mpdserver.mpdserver(self)
 		self.mpdserver.startserver('localhost', 6601)
-		#import dbus_mpris
-		#self.dbus_mpris = dbus_mpris.dbus_mpris(self)
+		import dbus_mpris
+		self.dbus_mpris = dbus_mpris.dbus_mpris(self)
 		import gui
 		self.gtkgui = gui.GTKGui(self)
 		

@@ -3,7 +3,7 @@
 try:
 	import gi, loggy, player
 	gi.require_version('Gst', '1.0')
-	from gi.repository import GObject, Gst, Gtk, GdkPixbuf, GdkX11
+	from gi.repository import GObject, Gst, Gtk, GdkPixbuf, GdkX11, GstVideo
 except:
 	loggy.warn('Gui could not import required libraries')
 # import soundblizzard
@@ -246,7 +246,7 @@ class GTKGui(object):
 		#widget.add(art)
 		widget.show()
 		self.album_arts.append(widget)
-		print('got image '+str(widget))
+		#print('got image '+str(widget))
 		#widget.set_from_file('logo16.png')
 		
 		#self.on_image_resize(widget, None)
@@ -419,9 +419,13 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 #	def __destroy__(self):
 #		loggy.log('GTK_media_view destroyed')
 #		self.builder.destroy()
+	def on_button4_clicked(self, button):
+		loggy.debug('GTK_media_view.on_button4_clicked')
+		self.sb.sbdb.recreate_db()
+		True
 	def on_button3_clicked(self, button):
 		loggy.debug('GTK_media_view.on_button3_clicked')
-		self.sb.sbdb.recreate_db()
+		self.sb.sbdb.update_db()
 		True
 	def on_button1_clicked(self, button):
 		Folderbox = Gtk.FileChooserDialog("Please select a folder containing media", self.sb.gtkgui.window, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
@@ -450,9 +454,9 @@ class GTK_preferences(Gtk.HBox): # thanks to http://stackoverflow.com/questions/
 		True
 class GTK_now_playing(Gtk.DrawingArea):
 	def __init__(self,sb):
-		print ("in the monkey")
+		#print ("in the monkey")
 		Gtk.DrawingArea.__init__(self)
-		sb.gtkgui.is_video_out(self)
+		#sb.gtkgui.is_video_out(self)
 		True
 
 if __name__ == "__main__":

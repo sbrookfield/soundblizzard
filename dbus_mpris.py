@@ -27,8 +27,9 @@ class dbus_mpris(dbus.service.Object):
 	def __init__(self, soundblizzard):
 		self.soundblizzard = soundblizzard
 		self.bus = dbus.SessionBus()
-		bus_name = dbus.service.BusName('org.gnome.SoundBlizzard', self.bus)
+		bus_name = dbus.service.BusName('org.mpris.MediaPlayer2.SoundBlizzard', self.bus)
 		dbus.service.Object.__init__(self, bus_name, '/org/mpris/MediaPlayer2')
+		self.player = dbus_mpris_player(self.soundblizzard, self.bus)
 	@dbus.service.method(INTERFACE_NAME)
 	def hello(self):
 		return 'Hell Yeah'

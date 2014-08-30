@@ -142,9 +142,9 @@ class player(GObject.GObject):
                 loggy.log('have xwindow id')
             else:
                 loggy.log( "Player GST message unhandled:" + str(message.type))
-        elif message.type == (Gst.MessageType.STREAM_START or Gst.MessageType.RESET_TIME): None
+        elif (message.type == Gst.MessageType.STREAM_START or message.type == Gst.MessageType.RESET_TIME): None
         else:
-            loggy.warn('Player - unknown messge' + str(message.type))
+            loggy.warn('Player - unknown message' + str(message.type))
         #TODO: remove message from buffer?
     def play(self):
         self.player.set_state(Gst.State.PLAYING)
@@ -186,7 +186,7 @@ class player(GObject.GObject):
             return 0
         else:
             ns = int(self.player.query_duration(Gst.Format.TIME)[1])
-            print (ns)
+            #print (ns)
             if (self.durns != ns and ns != None):
                 self.durns = int(ns)
                 self.dursec = int(self.durns / Gst.SECOND)

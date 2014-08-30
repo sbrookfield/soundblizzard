@@ -191,7 +191,7 @@ Pos: \nId: {values[songid]}\n'''
 			output += 'Title: %s\n' % str(self.sb.player.tags.get('title'))
 			output += 'Album: %s\n' % str(self.sb.player.tags.get('artist'))
 			output += 'Track: %s\n' % (str(self.sb.player.tags.get('track-number'))+'/'+str(self.sb.player.tags.get('track-count')))
-			output += 'Date: %s\n' % str(self.sb.player.tags.get('date').year)
+			output += 'Date: %s\n' % str(self.sb.player.tags.get('date'))
 			output += 'Genre: %s\n' % str(self.sb.player.tags.get('genre'))
 			output += 'Pos: %i\n' % (self.sb.playlist.position)
 			output += 'Id: %i\n' % (self.sb.sbdb.get_uri_db_info(self.sb.player.uri)['songid'])#TODO: put all info into tags

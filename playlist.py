@@ -15,6 +15,9 @@ class playlist():
 		self.repeat = self.toggle(False)
 		self.consume = self.toggle(False)
 		self.single = self.toggle(False)
+	def read_playlist_dir(self):
+		Gio.File(path=self.sb.config.config['playlistfolder'])
+		
 	class toggle(GObject.GObject):
 		toggle = False # holds boolean
 		__gsignals__ = {'changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(GObject.TYPE_BOOLEAN,)),}	
