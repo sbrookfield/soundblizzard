@@ -269,7 +269,7 @@ Pos: \nId: {values[songid]}\n'''
 			self.sb.player.play()
 		return 'OK\n'
 	def playid(self, arg):
-		self.sb.playlist.load_id(int(arg))
+		self.sb.playlist.load_uri(int(arg))
 		return 'OK\n'
 	def previous(self, arg):
 		self.sb.playlist.get_prev()
@@ -286,7 +286,7 @@ Pos: \nId: {values[songid]}\n'''
 	def seekid(self, arg):
 		arg = arg.split()
 		if len(arg)>1:
-			self.sb.playlist.load_id(int(arg[0]))
+			self.sb.playlist.load_uri(int(arg[0]))
 			self.sb.player.setpos(int(arg[1]) * self.sb.player.SECOND)
 		else:
 			self.sb.player.setpos(int(arg[0]) * self.sb.player.SECOND)

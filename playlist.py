@@ -2,11 +2,12 @@ try:
 	import loggy, player, random, soundblizzard
 except:
 	loggy.warn('Could not find required libraries: loggy, player, gobject')
-from gi.repository import GObject
+from gi.repository import GObject, Gio
 class playlist():
 	playlist = []
 	position = -1
 	history = []
+	playlists = {}
 	def __init__(self, sb):
 		self.sb = soundblizzard.soundblizzard # fakes for tab completion - assigns it to the class
 		self.sb = sb #self.sb is now the parent soundblizzard instance
@@ -15,9 +16,57 @@ class playlist():
 		self.repeat = self.toggle(False)
 		self.consume = self.toggle(False)
 		self.single = self.toggle(False)
+		self.read_playlist_dir()
 	def read_playlist_dir(self):
-		Gio.File(path=self.sb.config.config['playlistfolder'])
-		
+		self.plfolder = Gio.File.new_for_path(path=self.sb.config.config['playlistfolder'])
+		query = self.plfolder.query_file_type(Gio.FileQueryInfoFlags.NONE, None)
+		if (query != Gio.FileType.DIRECTORY):
+			loggy.warn('Playlist folder is not a directory:' + self.sb.config.config['playlistfolder'])
+			return
+		childrenenumerator = self.plfolder.enumerate_children('standard::display-name,time::modified', Gio.FileQueryInfoFlags.NONE, None)#fills childrenenumerator with fileinfos of child files of directory with information on display name and modified (only). Follows symlinks. See https://developer.gnome.org/pygobject/2.18/gio-constants.html#gio-file-attribute-constants. Content type does not seem to be particularly useful in this context
+		while True:
+			fl = childrenenumerator.next_file()
+			if fl:
+				if fl.get_display_name().lower().endswith('.m3u'):
+					#loggy.log('found playlist'+ fl.get_display_name())
+					self.read_playlist_from_giofile(self.plfolder.get_child_for_display_name(fl.get_display_name()), )
+			else:
+				loggy.log('Done reading playlist folder')
+				break
+		self.plmonitor = self.plfolder.monitor_directory(Gio.FileMonitorFlags.NONE, None)
+		if self.plmonitor == None: loggy.warn('unable to monitor playlist directory')
+		self.plmonitor.connect('changed', self.playlist_monitor_changed)
+	def playlist_monitor_changed(self, monitor, file1, file2, event):
+		#print ("Changed:",monitor, file1, file2, event)
+		if event == Gio.FileMonitorEvent.CREATED or event == Gio.FileMonitorEvent.CHANGED:
+			print ( 'file created/changed '+file1.get_path())
+			if file1.get_path().lower().endswith('.m3u'):
+				self.read_playlist_from_giofile(file1)
+		elif event == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
+			True # ignore for now
+		elif event == Gio.FileMonitorEvent.DELETED:
+			print ('file deleted' + file1.get_path())
+			self.sb.player.emit('deleted-playlist', file1.get_path())
+			if file1.get_path() in self.playlists.keys(): del self.playlists[file1.get_path()]
+		else:
+			loggy.debug('File Monitor released unimplemented event'+str(monitor)+str(file1)+str(file2)+str(event))
+	def read_playlist_from_giofile(self, giofile):
+		name = giofile.get_path()
+		(success, contents, tag) =  giofile.load_contents()
+		contents = contents.decode().splitlines()
+		#print(contents)
+		if contents.pop(0).startswith('#EXTM3U'):
+			#playlist found, wipe/create playlist with that name
+			self.playlists[name] = []
+			for line in contents:
+				if line.startswith('/'):
+					self.playlists[name].append('file://'+line)
+				elif (line.startswith('#')): None
+				else:
+					loggy.warn('Could not analyse line in playlist '+name+' :'+line)
+			loggy.log('Found '+str(len(self.playlists[name]))+' items in m3u playlist '+name)
+			self.playlist=self.playlists[name]
+			self.sb.player.emit('new-playlist',name)
 	class toggle(GObject.GObject):
 		toggle = False # holds boolean
 		__gsignals__ = {'changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(GObject.TYPE_BOOLEAN,)),}	
@@ -57,17 +106,17 @@ class playlist():
 					self.position = 0
 					return #TODO: emit end of playlist signal
 		#TODO: implement consume
-		self.load_id(self.playlist[self.position])
+		self.load_uri(self.playlist[self.position])
 	def load_pos(self, pos):
 		'''
 		Starts playing playlist at position pos
 		'''
 		self.position = pos
-		self.load_id(self.playlist[self.position])
-	def load_id(self, songid):
+		self.load_uri(self.playlist[self.position])
+	def load_uri(self, uri):
 		#self.sb.player.load_uri(self.sb.sbdb.get_id_db_info(id)['uri'])
 		try:
-			self.sb.player.load_uri(self.sb.sbdb.get_id_db_info(songid)['uri'])
+			self.sb.player.load_uri(uri)
 		except TypeError:
 			loggy.warn('could not get next playlist item, skipping')
 			self.get_next()
@@ -76,7 +125,7 @@ class playlist():
 		self.position -= 1
 		if (self.position<0):
 			self.position = 0
-		self.load_id(self.playlist[self.position])
+		self.load_uri(self.playlist[self.position])
 	def add_uri(self, uri, pos=None):
 		loggy.debug('playlist.add_uri '+str(uri)+str(pos))
 		songid = self.sb.sbdb.get_uri_db_info(uri)

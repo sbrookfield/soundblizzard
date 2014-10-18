@@ -45,8 +45,12 @@ class player(GObject.GObject):
                     #'''emitted when position changes (every second) with time in nanoseconds, seconds and as formatted string'''
                     'duration-changed' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
                     #'''emitted when play state changes with time in nanoseconds, seconds and as formatted string'''
-                    'eos' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,())
+                    'eos' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,()),
                     #'''emitted when end of file reached'''
+                    'new-playlist' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(str,)),
+                    #'''emitted when there is a new playlist'''
+                    'deleted-playlist' : (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE,(str,))
+                    #'''emitted when a playlist is removed'''
                     }
     def __init__(self, soundblizzard):  #Thanks to http://pygstdocs.berlios.de/pygst-tutorial/playbin.html
         GObject.GObject.__init__(self)

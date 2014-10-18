@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from gi.repository import Gio
+from gi.repository import Gio, Gobject
 #import os
 folder = Gio.File.new_for_uri('file:///home/sam/Music/Playlists')
 query = folder.query_file_type(Gio.FileQueryInfoFlags.NONE, None)

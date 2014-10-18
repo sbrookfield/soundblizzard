@@ -306,7 +306,23 @@ class GTKGui(object):
 		self.master_tree_add('Now Playing', self.slave_enter_now_playing_view)
 		self.master_tree_add('Media', self.slave_enter_media_view)
 		self.master_tree_add('Preferences', self.slave_enter_preferences_view)
-
+		self.master_tree_playlist_iter = self.main_tree_store.append(None, ['Playlists'])
+		for playlist in self.sb.playlist.playlists.keys():
+			self.main_tree_store.append(self.master_tree_playlist_iter, [playlist])
+		self.sb.player.connect('new-playlist', self.master_tree_new_playlist)
+		self.sb.player.connect('deleted-playlist', self.master_tree_deleted_playlist)
+	def master_tree_deleted_playlist(self,player, name):
+		while name in self.main_tree_store[self.master_tree_playlist_iter]: self.main_tree_store[self.master_tree_playlist_iter].remove(name)
+		
+		return True #What a line of code!
+	def master_tree_new_playlist(self,player, name):
+		if name in self.main_tree_store[self.master_tree_playlist_iter][0]:
+			return True
+		else:
+			self.main_tree_store.append(self.master_tree_playlist_iter, [name])
+			return True
+		
+		
 #TODO: connect signals other than map automatically
 	def is_slave_area(self, widget):
 		loggy.debug('gui.is_slave_area')
@@ -383,8 +399,8 @@ class GTK_media_view(Gtk.HBox):
 		loggy.debug('gui.GTK_media_view.treeview_activated')
 		(model, iterat) = treeview.get_selection().get_selected()
 		if iterat:
-			self.sb.playlist.load_id(self.list_store.get_value(iterat,len(self.sb.sbdb.keys)-1))
-			self.sb.playlist.playlist = [self.list_store.get_value(iterat,len(self.sb.sbdb.keys)-1)]
+			self.sb.playlist.load_uri(self.list_store.get_value(iterat,len(self.sb.sbdb.keys)-2))
+			self.sb.playlist.playlist = [self.list_store.get_value(iterat,len(self.sb.sbdb.keys)-2)]
 	def tv_clicked(self, widget, i):
 		loggy.debug('gui.GTK_media_view.tv_clicked')
 		widget.set_sort_column_id(i)
