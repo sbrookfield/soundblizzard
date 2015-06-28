@@ -55,7 +55,7 @@ class mpdserver(object):
 		self.conn, temp = sock.accept()
 		loggy.log( "mpdserver connected from " + str(self.conn.getsockname()))
 		GObject.io_add_watch(self.conn, GObject.IO_IN, self.handler)
-		print('fishes\n')
+		#print('fishes\n')
 		self.conn.sendall(bytes('OK MPD 0.16.0\n', 'UTF-8'))
 		#self.conn.
 		return True
