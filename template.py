@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-#		Copyright 2011-2014 Samuel James Brookfield
+#		Copyright 2011-2015 Samuel James Brookfield
 #
 #		This file is part of Soundblizzard.
 #
@@ -17,7 +17,7 @@
 #		You should have received a copy of the GNU General Public License
 #		along with Soundblizzard.	If not, see <http://www.gnu.org/licenses/>.
 '''
-Created on 16th August 2014
+Created on 17th September 2015
 
 @author: Sam Brookfield
 '''
